@@ -13,6 +13,16 @@ library(tidyverse)
 library(here)
 library(janitor)
 ```
+# Saving to Git
+1. Save your shit
+2. Go to the Git tab
+3. Click the little white boxes next to the stuff you want to send to the other person
+4. Click Commit
+5. Write a witty but descriptive commit message
+6. Hit Commit!
+7. *PUUUUUUULLLLLLL* then push
+8. Profit
+
 
 To comply with the Paris Accord, governments around the world are seeking ways to reduce carbon emissions. You have been asked to provide guidance on how country “X” can most efficiently reduce carbon emissions. In this homework you will conduct data analysis, simulations, and policy analysis to help inform this decision. The data for this assignment are available in the file “HW2Data.csv”, available on Gauchospace. The data contain estimates of the marginal cost of carbon abatement for four economic sectors (sectors A, B, C, and D), for different levels of abatement. A few notes:
  Current carbon emissions in the sectors are: (A=170, B=200, C=230, and D=300).
