@@ -1,7 +1,7 @@
 ---
 title: "ESM 204: Homework 2"
 subtitle: "Simulating a Carbon Market"
-author: "Kazie Mermel & Keene Morrow"
+author: "Kazia Mermel & Keene Morrow"
 date: "4/27/2020"
 output: html_document
 ---
@@ -20,7 +20,7 @@ library(janitor)
 4. Click Commit
 5. Write a witty but descriptive commit message
 6. Hit Commit!
-7. *PUUUUUUULLLLLLL* then push
+7. *PUUUUUUULLLLLLL* then push (I enjoy how much this sounds like instructions for a dance move)
 8. Profit
 
 ***
@@ -49,3 +49,80 @@ b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t
 c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
 
 4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, and/or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market? Describe these incentives as quantitatively as possible.
+
+```{r}
+# load in packages
+library(tidyverse)
+library(janitor)
+
+# read in data
+abatement <- read.csv("ESM204_HW2_Data.csv") %>% 
+  clean_names()
+
+```
+
+
+
+```{r}
+# Part 1
+# Plot Each sector's marginal abatement cost estimates
+# Sector A
+
+ggplot(data = abatement,
+       aes(
+         x = abatement,
+         y = mc_a)) +
+  geom_point() +
+  labs(
+    x = "Abatement (tons)",
+    y = "Marginal Cost of Abatement ($/ton)",
+    title = "Marginal Cost of Carbon Abatement for Economic Sector A")
+
+# Sector B
+
+ggplot(data = abatement,
+       aes(
+         x = abatement,
+         y = mc_b)) +
+  geom_point() +
+  labs(
+    x = "Abatement (tons)",
+    y = "Marginal Cost of Abatement ($/ton)",
+    title = "Marginal Cost of Carbon Abatement for Economic Sector B")
+
+# Sector C
+
+ggplot(data = abatement,
+       aes(
+         x = abatement,
+         y = mc_c)) +
+  geom_point() +
+  labs(
+    x = "Abatement (tons)",
+    y = "Marginal Cost of Abatement ($/ton)",
+    title = "Marginal Cost of Carbon Abatement for Economic Sector C")
+
+#Sector D
+
+ggplot(data = abatement,
+       aes(
+         x = abatement,
+         y = mc_d)) +
+  geom_point() +
+  labs(
+    x = "Abatement (tons)",
+    y = "Marginal Cost of Abatement ($/ton)",
+    title = "Marginal Cost of Carbon Abatement for Economic Sector D")
+
+
+# Compound figure for all four sectors
+
+# Write down a plausible functional form for the marginal cost of abatement
+```
+
+```{r}
+# Part 2
+# Convert each marginal cost function from abatement to pollution
+
+```
+
