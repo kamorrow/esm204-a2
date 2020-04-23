@@ -7,11 +7,24 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 library(tidyverse)
 library(here)
 library(janitor)
+library(stringr)
+
+carbon <- read_csv("ESM204_HW2_Data.csv")
+
+carbon_long <- carbon %>%
+  pivot_longer(cols = 2:5, names_to = "sector") %>%
+  mutate(sector = str_sub(sector, 4))
+
+ggplot(data = carbon_long) +
+  geom_point(aes(x = value,
+                 y = Abatement,
+                 color = sector)) +
+  facet_wrap(~ sector)
 ```
 # Saving to Git
 1. Save your shit
