@@ -18,11 +18,12 @@ carbon <- read_csv("ESM204_HW2_Data.csv")
 
 carbon_long <- carbon %>%
   pivot_longer(cols = 2:5, names_to = "sector") %>%
-  mutate(sector = str_sub(sector, 4))
+  mutate(sector = str_sub(sector, 4)) %>%
+  rename(abatement = Abatement)
 
 ggplot(data = carbon_long) +
   geom_point(aes(x = value,
-                 y = Abatement,
+                 y = abatement,
                  color = sector)) +
   facet_wrap(~ sector)
 ```
@@ -46,6 +47,45 @@ To comply with the Paris Accord, governments around the world are seeking ways t
 
 Your task is to produce a *1 page memo*, with supporting appendices, to advise country X (and in some questions, country Y) about how best to reduce carbon emissions. Your memo and appendices must address the following questions.
 1. Start with sector A. Plot that sector’s marginal abatement cost estimates and write down a plausible functional form for the marginal cost of abatement. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms, and you don’t necessarily have to assume the same function for each sector. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
+
+```{r}
+# subset for just Sector A
+carbon_a <- carbon_long %>%
+  filter(sector == "A")
+
+# Model Exploration
+## Linear
+carbon_a_lm <- lm(abatement ~ value, data = carbon_a)
+summary(carbon_a_lm)
+
+## Non-Linear
+carbon_a_poly2 <- lm(abatement ~ poly(value, 2), data = carbon_a)
+summary(carbon_a_poly2)
+
+carbon_a_poly3 <- lm(abatement ~ poly(value, 3), data = carbon_a)
+summary(carbon_a_poly3)
+
+
+```
+
+
+```{r}
+# Plot
+ggplot(data = carbon_a) +
+  geom_point(aes(x = value,
+                 y = abatement),
+                 color = "dark red") +
+  labs(subtitle = "Sector A",
+       title = "Abatement",
+       x = "Quantity (tons abated)",
+       y = "Price ($/ton)",
+       caption = "Kazia Mermel & Keene Morrow\nESM 204 Spring 2020") +
+  theme_minimal()
+
+
+
+```
+
 
 2. Using these models (i.e. use the functions you have estimated, not the data themselves) and the current level of carbon emissions (provided above), derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first ton, second ton, etc.? Plot each sector’s demand curve for carbon emissions on a graph.
 
