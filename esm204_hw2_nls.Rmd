@@ -1,7 +1,7 @@
 ---
 title: "ESM 204: Homework 2"
 subtitle: "Simulating a Carbon Market"
-author: "Kazia Mermel & Keene Morrow"
+author: "Anthony Luna, Kazia Mermel, & Keene Morrow"
 date: "4/27/2020"
 output: html_document
 ---
@@ -14,20 +14,29 @@ library(here)
 library(janitor)
 library(stringr)
 library(boot)
+library(broom)
 
 carbon <- read_csv("ESM204_HW2_Data.csv")
 
 carbon_long <- carbon %>%
   pivot_longer(cols = 2:5, names_to = "sector") %>%
   mutate(sector = str_sub(sector, 4)) %>%
-  rename(abatement = Abatement)
+  rename(abatement = Abatement,
+         mc = value)
 
 ggplot(data = carbon_long) +
-  geom_point(aes(x = value,
-                 y = abatement,
+  geom_point(aes(x = abatement,
+                 y = mc,
                  color = sector)) +
   facet_wrap(~ sector)
+
+# current emissions
+current_a <- 170
+current_b <- 200
+current_c <- 230
+current_d <- 300
 ```
+
 # Saving to Git
 1. Save your shit
 2. Go to the Git tab
@@ -49,33 +58,142 @@ To comply with the Paris Accord, governments around the world are seeking ways t
 Your task is to produce a *1 page memo*, with supporting appendices, to advise country X (and in some questions, country Y) about how best to reduce carbon emissions. Your memo and appendices must address the following questions.
 1. Start with sector A. Plot that sector’s marginal abatement cost estimates and write down a plausible functional form for the marginal cost of abatement. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms, and you don’t necessarily have to assume the same function for each sector. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
 
+# A
 ```{r}
 # subset for just Sector A
 carbon_a <- carbon_long %>%
   filter(sector == "A")
 
+# Explroe data
+ggplot(data = carbon_a) +
+  geom_smooth(aes(x = abatement,
+                  y = mc),
+              color = "dark red",
+              size = 0.2,
+              linetype = "dashed",
+              fill = "red",
+              alpha = 0.3) +
+  geom_point(aes(x = abatement,
+                 y = mc)) +
+  labs(y = "Cost ($/ton)",
+         x = "Abatement (tons)",
+         title = "Sector A",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
+
 # Model Exploration
 ## Linear
-carbon_a_lm <- lm(abatement ~ value, data = carbon_a)
+carbon_a_lm <- lm(mc ~ abatement, data = carbon_a)
 summary(carbon_a_lm)
 
-## Non-Linear
-
+carbon_a_lm$coefficients[1]
+carbon_a_lm$coefficients[2]
 
 ```
+*Sector A seems linear.  Equation is:*
+` r mc = carbon_a_lm$coefficients[2]*abatement + carbon_a_lm$coefficients[1]`
+
+
+# B
+```{r}
+# subset for just Sector B
+carbon_b <- carbon_long %>%
+  filter(sector == "B")
+
+# Explroe data
+ggplot(data = carbon_b) +
+  geom_smooth(aes(x = abatement,
+                  y = mc),
+              color = "dark green",
+              size = 0.2,
+              linetype = "dashed",
+              fill = "green",
+              alpha = 0.3) +
+  geom_point(aes(x = abatement,
+                 y = mc)) +
+  labs(y = "Cost ($/ton)",
+         x = "Abatement (tons)",
+         title = "Sector B",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
+```
+
+# C
+```{r}
+# subset for just Sector C
+carbon_c <- carbon_long %>%
+  filter(sector == "C")
+
+# Explroe data
+ggplot(data = carbon_c) +
+  geom_smooth(aes(x = abatement,
+                  y = mc),
+              color = "navy",
+              size = 0.2,
+              linetype = "dashed",
+              fill = "blue",
+              alpha = 0.3) +
+  geom_point(aes(x = abatement,
+                 y = mc)) +
+  labs(y = "Cost ($/ton)",
+         x = "Abatement (tons)",
+         title = "Sector C",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
+```
+
+
+# D
+```{r}
+# subset for just Sector C
+carbon_d <- carbon_long %>%
+  filter(sector == "D")
+
+# Explroe data
+ggplot(data = carbon_d) +
+  geom_smooth(aes(x = abatement,
+                  y = mc),
+              color = "purple",
+              size = 0.2,
+              linetype = "dashed",
+              fill = "purple",
+              alpha = 0.3) +
+  geom_point(aes(x = abatement,
+                 y = mc)) +
+  labs(y = "Cost ($/ton)",
+         x = "Abatement (tons)",
+         title = "Sector D",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
+```
+
 
 ```{r}
-# If bootstrapping is needed
+## Non-Linear
 
-# mean_fun <- function(x,i) {mean(x[i])}
+# carbon_b_lm
+# estimate growth rate to be ~
+# estimate K to be 180
+# A = 18
+
+# carbon_b_nls <- nls(abatement ~ K/(1 + A*exp(-r*value)),
+#               data = carbon_b,
+#               start = list(K = 180, A = 18, r = 0.17),
+#               trace = TRUE)
 # 
-# carbon_a_nc <- carbon_a$value
+# summary(carbon_b_nls)
 # 
-# # set.seed(5002) # makes the randomness reproducable... but don't abuse it
-# 
-# carbon_a_100 <- boot(data = carbon_a_nc,
-#                     statistic = mean_fun,
-#                     R = 100000)
+# model_out <- broom::tidy(carbon_b_nls) # cleaner model output with broom
+# model_out
+
 ```
 
 
