@@ -182,17 +182,48 @@ ggplot(data = carbon_d) +
 # carbon_b_lm
 # estimate growth rate to be ~
 # estimate K to be 180
-# A = 18
+A = 10
+carbon_fun_b <- function(K,A,r,x){K/(1 + A*exp(-r*x))}
+  
+ carbon_b_nls <- nls(abatement ~ carbon_fun_b(K,A,r,abatement),
+               data = carbon_b,
+               start = list(K = 60, A = 18, r = 0.17),
+               trace = TRUE)
+ 
+ summary(carbon_b_nls)
+ 
+ model_out <- broom::tidy(carbon_b_nls) # cleaner model output with broom
+ model_out
 
-# carbon_b_nls <- nls(abatement ~ K/(1 + A*exp(-r*value)),
-#               data = carbon_b,
-#               start = list(K = 180, A = 18, r = 0.17),
-#               trace = TRUE)
-# 
-# summary(carbon_b_nls)
-# 
-# model_out <- broom::tidy(carbon_b_nls) # cleaner model output with broom
-# model_out
+## Predicted values using the model for plotting
+predict_carbon_b_nls <- data.frame(mc_predict = predict(carbon_b_nls,carbon_b$abatement),sector = "B",abatement=carbon_b$abatement)
+
+ggplot()+
+  geom_point(data = carbon_b,aes(x=abatement,y=mc))+
+  geom_path(data=predict_carbon_b_nls,aes(x=abatement,y=mc_predict))
+ 
+#Here is some code Anthony Used for ecology assignment two. I've repurposed it for this assignment.
+# Fit a linear model used for 'automatic good guess'
+#fit.lm <- lm(mc~abatement , data = carbon_c)
+#
+## 'Automatic good guess' for use in model
+#y0.ini <- fit.lm$coefficients[1]
+#b.ini <- fit.lm$coefficients[2]
+#x0.ini <- mean(carbon_b$abatement)
+#
+## Defining our linear with lower plateau function as described in Grassini et al. 2013
+#linplat <-  function(x,y0,b,x0){ifelse(x<=x0, y0,y0+b*(x-x0))}
+#
+## nls model using the defined LLP and using starting values from our 'automatic good guess'
+#LLP_carbon_c_model <-  nls(mc~linplat(abatement, y0, b, x0),
+#             data = carbon_c,
+#             start = list(y0=y0.ini,b=b.ini,x0=x0.ini),
+#             trace=FALSE,
+#             nls.control(maxiter=10000))
+#
+## Predicted values using the model for plotting
+#predict_LLP_carbon_c <- data.frame(abatement_predict = predict(LLP_carbon_b_model,carbon_c),sector = "C",
+#carbon_c$abatement)
 
 ```
 
