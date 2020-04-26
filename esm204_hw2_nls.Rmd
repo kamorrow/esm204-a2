@@ -74,8 +74,9 @@ carbon_a_lm$coefficients[1]
 carbon_a_lm$coefficients[2]
 
 ```
-*Sector A seems linear.  Equation is:*
-` r mc = carbon_a_lm$coefficients[2]*abatement + carbon_a_lm$coefficients[1]`
+
+*Sector A Equation is:*
+mc = `r carbon_a_lm$coefficients[2]` * abatement + `r carbon_a_lm$coefficients[1]`
 
 
 # B - Choose Logistic Model
@@ -104,8 +105,8 @@ carbon_b_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
 
 summary(carbon_b_nls)
 
-model_out <- broom::tidy(carbon_b_nls) # cleaner model output with broom
-model_out
+model_out_b <- broom::tidy(carbon_b_nls) # cleaner model output with broom
+model_out_b
 
 ## Predicted values using the model for plotting
 predict_carbon_b_nls <- data.frame(mc_predict = predict(carbon_b_nls, carbon_b$abatement),
@@ -124,9 +125,18 @@ ggplot()+
 
 ```
 
- 
+*Sector B Equation is:*
+mc = K/(1 + A * exp(- r * abatement)
 
-# C - CHoose Piecewise
+where
+
+K = `r model_out_b$estimate[1]`
+
+A = `r model_out_b$estimate[2]`
+
+r = `r model_out_b$estimate[3]`
+
+# C - Choose Piecewise
 ```{r}
 # subset for just Sector C
 carbon_c <- carbon_long %>%
@@ -175,6 +185,15 @@ ggplot()+
 
 ```
 
+*Sector C Equation is:*
+
+From 0 to `r -carbon_c_40_lm$coefficients[1] / carbon_c_40_lm$coefficients[2]`:
+
+mc = 0
+
+From `r -carbon_c_40_lm$coefficients[1] / carbon_c_40_lm$coefficients[2]` to infinity:
+
+mc = `r carbon_c_40_lm$coefficients[2]` * abatement + `r carbon_c_40_lm$coefficients[1]`
 
 # Sector D - Choose Logistic Model
 ```{r}
@@ -199,8 +218,8 @@ carbon_d_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
 summary(carbon_d_nls) # Residual standard error: 9.089 on 13 degrees of freedom
 AIC(carbon_d_nls) # 120.7116
 
-model_out <- broom::tidy(carbon_d_nls) # cleaner model output with broom
-model_out
+model_out_d <- broom::tidy(carbon_d_nls) # cleaner model output with broom
+model_out_d
 
 ## Predicted values using the nls model for plotting
 predict_carbon_d_nls <- data.frame(mc_predict = predict(carbon_d_nls, carbon_d$abatement),
@@ -224,6 +243,17 @@ ggplot()+
 
 
 ```
+
+*Sector D Equation is:*
+mc = K/(1 + A * exp(- r * abatement)
+
+where
+
+K = `r model_out_d$estimate[1]`
+
+A = `r model_out_d$estimate[2]`
+
+r = `r model_out_d$estimate[3]`
 
 ```{r}
 predict_carbon_a <- predict(carbon_a_lm,carbon_a)
