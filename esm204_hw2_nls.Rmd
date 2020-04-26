@@ -240,51 +240,9 @@ summary(carbon_c_lm_poly3)
 # Multiple R-squared:  0.9408,	Adjusted R-squared:  0.926 
 AIC(carbon_c_lm_poly3) # 138.3138
 
-## Non-Linear
 
-# estimate growth rate (r) to be = carbon_c_lm$coefficients[2] ~ 1.13
-# estimate K to be 160
-# A = (K - P) / P = 80
-
-### CAN'T GET NLS TO WORK HERE
-
-# carbon_c_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
-#                     data = carbon_c,
-#                     start = list(K = 200,
-#                                  A = 1,
-#                                  r = carbon_c_lm$coefficients[2]),
-#                     trace = TRUE)
-# 
-# summary(carbon_c_nls) # 
-# AIC(carbon_c_nls) # 
-# 
-# model_out <- broom::tidy(carbon_c_nls) # cleaner model output with broom
-# model_out
-# 
-# ## Predicted values using the model for plotting
-# predict_carbon_c_nls <- data.frame(mc_predict = predict(carbon_c_nls, carbon_c$abatement),
-#                                    sector = "B",
-#                                    abatement = carbon_c$abatement)
-
-# predict_carbon_c_lm_poly2 <- data.frame(mc_predict = predict(carbon_c_lm_poly2,
-#                                                             carbon_c$abatement),
-#                                    sector = "C",
-#                                    abatement = carbon_c$abatement)
-
-ggplot()+
-  geom_point(data = carbon_c,
-             aes(x = abatement,
-                 y = mc)) #+
-  # geom_path(data = predict_carbon_c_lm_poly2,
-  #           aes(x = abatement,
-  #               y = mc_predict))
-
-
-```
-```{r}
-# Exploration of Sector C's values >40
-
-# subset for just Sector C
+# Exploration of Sector C's values abatement > 40
+# subset for > 40
 carbon_c_40 <- carbon_long %>%
   filter(sector == "C",
          abatement > 39)
@@ -315,6 +273,37 @@ summary(carbon_c_40_lm_poly3)
 # Multiple R-squared:  0.9245,	Adjusted R-squared:  0.8962
 AIC(carbon_c_40_lm_poly3) # 107.0187
 
+## Non-Linear
+
+# estimate growth rate (r) to be = carbon_c_lm$coefficients[2] ~ 1.13
+# estimate K to be 160
+# A = (K - P) / P = 80
+
+### CAN'T GET NLS TO WORK HERE
+
+# carbon_c_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
+#                     data = carbon_c,
+#                     start = list(K = 200,
+#                                  A = 1,
+#                                  r = carbon_c_lm$coefficients[2]),
+#                     trace = TRUE)
+# 
+# summary(carbon_c_nls) # 
+# AIC(carbon_c_nls) # 
+# 
+# model_out <- broom::tidy(carbon_c_nls) # cleaner model output with broom
+# model_out
+
+
+## Predicted values using the model for plotting
+# ALL DATA (red)
+new_df <- data.frame(abatement = carbon_c$abatement)
+
+mc_predict <- predict(carbon_c_lm_poly2, newdata = new_df)
+
+predict_carbon_c_lm <- data.frame(new_df, mc_predict)
+
+# > 40 (blue)
 
 new_df <- data.frame(abatement = carbon_c_40$abatement)
 
@@ -322,16 +311,23 @@ mc_predict <- predict(carbon_c_40_lm, newdata = new_df)
 
 predict_carbon_c_40_lm <- data.frame(new_df, mc_predict)
 
-
+# Comparison
 ggplot()+
   geom_point(data = carbon_c,
              aes(x = abatement,
                  y = mc)) +
+  geom_path(data = predict_carbon_c_lm,
+            aes(x = abatement,
+                y = mc_predict),
+            color = "red") +
   geom_path(data = predict_carbon_c_40_lm,
             aes(x = abatement,
-                y = mc_predict))
-```
+                y = mc_predict),
+            color = "blue")
 
+# lm for values > 40 has lowest AIC (104 vs 137 for lowest full data set model)
+
+```
 
 
 # Sector D
@@ -413,12 +409,27 @@ predict_carbon_d_nls <- data.frame(mc_predict = predict(carbon_d_nls, carbon_d$a
                                    abatement = carbon_d$abatement)
 
 ggplot()+
+  # geom_smooth(data = carbon_d,
+  #             aes(x = abatement,
+  #                 y = mc),
+  #             color = "purple",
+  #             size = 0.2,
+  #             linetype = "dashed",
+  #             fill = "purple",
+  #             alpha = 0.3) +
   geom_point(data = carbon_d,
              aes(x = abatement,
                  y = mc)) +
   geom_path(data = predict_carbon_d_nls,
             aes(x = abatement,
-                y = mc_predict))
+                y = mc_predict)) +
+  labs(y = "Cost ($/ton)",
+         x = "Abatement (tons)",
+         title = "Sector D",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
 
 
 ```
