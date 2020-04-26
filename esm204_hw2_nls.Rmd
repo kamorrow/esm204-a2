@@ -275,10 +275,18 @@ Here, we converted from abatement cost to pollution demand. To do this, we subst
 # A
 
 MCa = 0.513A + 1.662
-MWTPa = 0.513*()
+MWTPa = 0.513*(Q0-Q) + 1.662
+MWTPa = 0.513*(170 - Q) + 1.662
+
+
 ```{r}
 # Convert from abatement cost to pollution demand
 # Substitute (Q0-Q) for abatement
+
+# this chunk is getting grouchy with me so I just wrote out the equations above rather than trying to make them work as functions. If anyone knows how to do that, go for it! -Kazia
+
+
+
 
 
 ```
