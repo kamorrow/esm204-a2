@@ -128,20 +128,11 @@ ggplot(data = carbon_b) +
 carbon_b_lm <- lm(mc ~ abatement, data = carbon_b)
 carbon_b_lm
 
-carbon_b_lm$coefficients[1]
-
-
 ## Non-Linear
 
-### NEED TO ESTIMATE K, A, r
-
-# carbon_b_lm
 # estimate growth rate (r) to be = carbon_b_lm$coefficients[2] ~ 0.39
 # estimate K to be 60
 # A = (K - P) / P = 10
-
-
-carbon_fun_b <- function(K,A,r,x){K/(1 + A*exp(-r*x))}
 
 carbon_b_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
              data = carbon_b,
@@ -156,11 +147,17 @@ model_out <- broom::tidy(carbon_b_nls) # cleaner model output with broom
 model_out
 
 ## Predicted values using the model for plotting
-predict_carbon_b_nls <- data.frame(mc_predict = predict(carbon_b_nls,carbon_b$abatement),sector = "B",abatement=carbon_b$abatement)
+predict_carbon_b_nls <- data.frame(mc_predict = predict(carbon_b_nls, carbon_b$abatement),
+                                   sector = "B",
+                                   abatement = carbon_b$abatement)
 
 ggplot()+
-  geom_point(data = carbon_b,aes(x=abatement,y=mc))+
-  geom_path(data=predict_carbon_b_nls,aes(x=abatement,y=mc_predict))
+  geom_point(data = carbon_b,
+             aes(x = abatement,
+                                 y = mc)) +
+  geom_path(data = predict_carbon_b_nls,
+            aes(x = abatement,
+                y = mc_predict))
  
 #Here is some code Anthony Used for ecology assignment two. I've repurposed it for this assignment.
 # Fit a linear model used for 'automatic good guess'
@@ -215,9 +212,77 @@ ggplot(data = carbon_c) +
     theme_minimal() +
     theme(plot.caption = element_text(hjust = 0, face = "italic"))
 ```
+```{r}
+
+# Model Exploration
+## Linear
+carbon_c_lm <- lm(mc ~ abatement,
+                  data = carbon_c)
+
+summary(carbon_c_lm)
+# Multiple R-squared:  0.9024,	Adjusted R-squared:  0.8954 
+AIC(carbon_c_lm) # 142.314
+
+## Polynomial
+### Second Order
+carbon_c_lm_poly2 <- lm(mc ~ poly(abatement, 2),
+                        data = carbon_c)
+
+summary(carbon_c_lm_poly2)
+# Multiple R-squared:  0.9369,	Adjusted R-squared:  0.9272 
+AIC(carbon_c_lm_poly2) # 137.3369
+
+### Third Order
+carbon_c_lm_poly3 <- lm(mc ~ poly(abatement, 3),
+                        data = carbon_c)
+
+summary(carbon_c_lm_poly3)
+# Multiple R-squared:  0.9408,	Adjusted R-squared:  0.926 
+AIC(carbon_c_lm_poly3) # 138.3138
+
+## Non-Linear
+
+# estimate growth rate (r) to be = carbon_c_lm$coefficients[2] ~ 1.13
+# estimate K to be 160
+# A = (K - P) / P = 80
+
+### CAN'T GET NLS TO WORK HERE
+
+# carbon_c_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
+#                     data = carbon_c,
+#                     start = list(K = 200,
+#                                  A = 1,
+#                                  r = carbon_c_lm$coefficients[2]),
+#                     trace = TRUE)
+# 
+# summary(carbon_c_nls) # 
+# AIC(carbon_c_nls) # 
+# 
+# model_out <- broom::tidy(carbon_c_nls) # cleaner model output with broom
+# model_out
+# 
+# ## Predicted values using the model for plotting
+# predict_carbon_c_nls <- data.frame(mc_predict = predict(carbon_c_nls, carbon_c$abatement),
+#                                    sector = "B",
+#                                    abatement = carbon_c$abatement)
+
+predict_carbon_c_lm_poly2 <- data.frame(mc_predict = predict(carbon_c_lm_poly2,
+                                                            carbon_c$abatement),
+                                   sector = "C",
+                                   abatement = carbon_c$abatement)
+
+ggplot()+
+  geom_point(data = carbon_c,
+             aes(x = abatement,
+                 y = mc)) +
+  geom_path(data = predict_carbon_c_lm_poly2,
+            aes(x = abatement,
+                y = mc_predict))
 
 
-# D
+```
+
+# Sector D
 ```{r}
 # subset for just Sector C
 carbon_d <- carbon_long %>%
@@ -243,6 +308,68 @@ ggplot(data = carbon_d) +
     theme(plot.caption = element_text(hjust = 0, face = "italic"))
 ```
 
+```{r}
+
+# Model Exploration
+## Linear
+carbon_d_lm <- lm(mc ~ abatement,
+                  data = carbon_d)
+
+summary(carbon_d_lm)
+# Multiple R-squared:  0.8335,	Adjusted R-squared:  0.8216 
+AIC(carbon_d_lm) # 129.2919
+
+## Polynomial
+### Second Order
+carbon_d_lm_poly2 <- lm(mc ~ poly(abatement, 2),
+                        data = carbon_d)
+
+summary(carbon_d_lm_poly2)
+# Multiple R-squared:  0.9099,	Adjusted R-squared:  0.896 
+AIC(carbon_d_lm_poly2) # 121.4675
+
+### Third Order
+carbon_d_lm_poly3 <- lm(mc ~ poly(abatement, 3),
+                        data = carbon_d)
+
+summary(carbon_d_lm_poly3)
+# Multiple R-squared:  0.9099,	Adjusted R-squared:  0.8874 
+AIC(carbon_d_lm_poly3) # 123.4675
+
+## Non-Linear
+
+# estimate growth rate (r) to be = carbon_d_lm$coefficients[2] ~ 
+# estimate K to be 85
+# A = (K - P) / P = 
+
+carbon_d_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
+                    data = carbon_d,
+                    start = list(K = 112,
+                                 A = 68,
+                                 r = carbon_d_lm$coefficients[2]),
+                    trace = TRUE)
+
+summary(carbon_d_nls) # Residual standard error: 9.089 on 13 degrees of freedom
+AIC(carbon_d_nls) # 120.7116
+
+model_out <- broom::tidy(carbon_d_nls) # cleaner model output with broom
+model_out
+
+## Predicted values using the model for plotting
+predict_carbon_d_nls <- data.frame(mc_predict = predict(carbon_d_nls, carbon_d$abatement),
+                                   sector = "B",
+                                   abatement = carbon_d$abatement)
+
+ggplot()+
+  geom_point(data = carbon_d,
+             aes(x = abatement,
+                 y = mc)) +
+  geom_path(data = predict_carbon_d_nls,
+            aes(x = abatement,
+                y = mc_predict))
+
+
+```
 
 
 
