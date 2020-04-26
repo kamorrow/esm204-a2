@@ -327,44 +327,6 @@ ggplot(data = predict_values)+
   facet_wrap(~sector,scales = "free")
 ```
 
-
-```{r}
-predict_carbon_a_demand <- data.frame(mc_predict = predict(carbon_a_lm,carbon_a), sector = "A",
-                                   abatement = current_a-carbon_a$abatement)
-
-predict_carbon_b_demand <- data.frame(mc_predict = predict(carbon_b_nls, current_b-carbon_b$abatement),
-                                   sector = "B",
-                                   abatement = current_b-carbon_b$abatement)
-
-new_df <- data.frame(abatement = current_c-carbon_c_40$abatement)
-mc_predict <- predict(carbon_c_40_lm, newdata = new_df)
-predict_carbon_c_40_lm <- data.frame(new_df, mc_predict) %>% 
-  mutate(sector = "C")
-predict_c_stage <- data.frame(abatement = seq(0,30,by=10),sector = rep("C",4), mc_predict = rep(current_c-0,4))
-predict_carbon_c_40_lm_demand <- predict_carbon_c_40_lm %>% 
-  union(predict_c_stage) %>% 
-  arrange(abatement)
-
-predict_carbon_d_nls_demand <- data.frame(mc_predict = predict(carbon_d_nls, current_d-carbon_d$abatement),
-                                   sector = "D",
-                                   abatement = carbon_d$abatement)
-
-predict_demand <- predict_carbon_a_demand %>% 
-  rbind(predict_carbon_b_demand) %>%  
-  rbind(predict_carbon_c_40_lm_demand) %>%  
-  rbind(predict_carbon_d_nls_demand) %>% 
-  add_column(type = "demand")
-
-predict_values <- predict_values %>% union(predict_demand)
-
-ggplot(data = predict_values)+
-  geom_path(aes(x=abatement,y=mc_predict,color=type))+
-  facet_wrap(~sector)
-
-```
-
-
-
 2. Using these models (i.e. use the functions you have estimated, not the data themselves) and the current level of carbon emissions (provided above), derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first ton, second ton, etc.? Plot each sector’s demand curve for carbon emissions on a graph.
 
 
@@ -412,6 +374,66 @@ b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t
 *Notes from Section*
 **Aggregate (Qa+Qb+Qc) must equal emissions goal. Find tax based off that value** 
 **Linear model is okay as long as you say it's not the least R^2 value. Sam may give bonus points for non-linear**
+```{r}
+# Inverse all three demand functions and handle edge cases (changing NAs to Zero etc)
+carbon_a_fun_inv <- function(P){
+  m <- as.numeric(carbon_a_lm$coefficients[2])
+  b <- as.numeric(carbon_a_lm$coefficients[1])
+  current_a-((P-b)/m)}
+
+
+carbon_b_fun_inv <- function(P){
+  K <- as.numeric(coefficients(carbon_b_nls)[1])
+  A <- as.numeric(coefficients(carbon_b_nls)[2])
+  r <- as.numeric(coefficients(carbon_b_nls)[3])
+  ifelse(is.na(current_b-(-(1/r)*log((1/A)*((K/P)-1)))),0,current_b-(-(1/r)*log((1/A)*((K/P)-1))))
+     }
+
+
+carbon_c_fun_inv <- function(P){
+  m <- as.numeric(carbon_c_40_lm$coefficients[2])
+  b <- as.numeric(carbon_c_40_lm$coefficients[1])
+  ifelse(P<=carbon_c_fun_demand(P),current_c-((P-b)/m),carbon_c_fun_demand(0))
+}
+
+
+carbon_d_fun_inv <- function(P){
+  K <- as.numeric(coefficients(carbon_d_nls)[1])
+  A <- as.numeric(coefficients(carbon_d_nls)[2])
+  r <- as.numeric(coefficients(carbon_d_nls)[3])
+  current_d-(-(1/r)*log((1/A)*((K/P)-1)))
+     }
+```
+
+
+```{r}
+#Construct dataframe with dummy data between relevant P range where the final column give the aggregate
+mc_range <- seq(0,350,by=.01)
+carbon_agg <- data.frame(mc= mc_range, 
+  type = rep("",length(mc_range)),
+  sector_a = ifelse(carbon_a_fun_inv(mc_range)>0,carbon_a_fun_inv(mc_range),0),
+  sector_b = ifelse(carbon_b_fun_inv(mc_range)>0,carbon_b_fun_inv(mc_range),0),
+  sector_c = carbon_c_fun_inv(mc_range)) %>% 
+  mutate(agg = sector_a+sector_b+sector_c)
+```
+
+
+```{r}
+# Plot to check that the aggregate values look about right...
+ggplot(data = predict_values %>% filter(type=="Demand") %>% filter(sector!="d"))+
+  geom_path(aes(x=abatement,y=mc_predict,color=sector))+
+  ylim(0,300)+xlim(0,600)
+
+ggplot() +
+  geom_path(data=carbon_agg, aes(x=agg,y=mc))+
+  geom_path(data=carbon_agg, aes(x=sector_a,y=mc),color="red")+
+  geom_path(data=carbon_agg, aes(x=sector_b,y=mc),color="green")+
+  geom_path(data=carbon_agg, aes(x=sector_c,y=mc),color="blue")+
+  xlim(0,600)
+
+
+#
+```
 
 c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
 
