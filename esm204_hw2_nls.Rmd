@@ -462,9 +462,11 @@ ggplot() +
   geom_path(data=carbon_agg, aes(x=agg,y=mc))+
   geom_path(data=carbon_agg %>% mutate(agg_sup=agg), aes(x=agg,y=mc))+
   # Here are some paths of the sectors if that would be helpful for a graph...
-  #geom_path(data=carbon_agg, aes(x=sector_a,y=mc),color="red")+
-  #geom_path(data=carbon_agg, aes(x=sector_b,y=mc),color="green")+
-  #geom_path(data=carbon_agg, aes(x=sector_c,y=mc),color="blue")+
+  geom_path(data=carbon_agg, aes(x=sector_a,y=mc),color="red")+
+  geom_path(data=carbon_agg, aes(x=sector_b,y=mc),color="green")+
+  geom_path(data=carbon_agg, aes(x=sector_c,y=mc),color="blue")+
+  # here is the tax line...
+  geom_hline(yintercept = tax$mc,linetype="dashed",color="gray")+
   xlim(0,600)
 
 
@@ -481,46 +483,61 @@ tax <- carbon_agg %>% filter(round(agg)==300) %>%
 
 
 ```{r tax_answer}
-#(1) Total cost (equals tax revenue?)
+#(1) Total cost 
+# The way this works is that the tax rate that we found
+# is used to calculate the demand for a given sector. 
+# Given this demand, we know that the benefit lost (or cost)
+# is equal to the area under the demand curve for a given 
+# sector going from the demand given the tax to the amount 
+# produced before the tax.
 
-total_cost_tax <-  integrate(carbon_a_fun_demand, carbon_a_fun_demand(tax$sector_a),current_a)$value+
-  integrate(carbon_b_fun_demand,carbon_b_fun_demand(tax$sector_b),current_b)$value+
-  integrate(carbon_c_fun_demand,carbon_c_fun_demand(tax$sector_c),current_c)$value
+total_cost_tax <-  integrate(carbon_a_fun_demand, carbon_a_fun_inv(tax$mc),current_a)$value+
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),current_b)$value+
+  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),current_c)$value
 
-#(2) Sector Cost 
+#(2) Sector Cost This is just the total cost broken up by sector
 
-sector_a_cost_tax <- integrate(carbon_a_fun_demand, carbon_a_fun_demand(tax$sector_a),current_a)$value+
-sector_b_cost_tax <- integrate(carbon_b_fun_demand,carbon_b_fun_demand(tax$sector_b),current_b)$value+
-sector_c_cost_tax <- integrate(carbon_c_fun_demand,carbon_c_fun_demand(tax$sector_c),current_c)$value
+sector_a_cost_tax <- integrate(carbon_a_fun_inv,carbon_a_fun_demand(tax$mc),current_a)$value
+sector_b_cost_tax <- integrate(carbon_b_fun_inv,carbon_b_fun_demand(tax$mc),current_b)$value
+sector_c_cost_tax <- integrate(carbon_c_fun_inv,carbon_c_fun_demand(tax$mc),current_c)$value
 
-#(3)
+#(3) There are a couple ways to calculate this but this is the easiest.
 tax_rev <- tax$agg*tax$mc
 
 ```
 
 c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
 
-
+The calculated tax above is the idealized price to achieve reduction of 300. Therefore we use this as the universal price of carbon to see emissions of each sector. Based on this, there will be a surplus of carbon credits for some sectors, and a deficit for other.
 ```{r}
-#Calculate equilibrium points for both Sectors A and C using uniroot
+#Allocated at start
+credit <- 100
 
-equi_sector_a <- uniroot(function(Q){carbon_a_fun(Q)-carbon_a_fun_demand(Q)},
-                         interval = c(0,300),
-                         extendInt = "yes")
+#Demand for credits
+a_cnt_demand <- carbon_a_fun_inv(tax$mc)
+b_cnt_demand <- carbon_b_fun_inv(tax$mc)
+c_cnt_demand <- carbon_c_fun_inv(tax$mc)
 
-# Equi point for B calculated to show that it is at 100 tons carbon, which checks out
-equi_sector_b <- uniroot(function(Q){carbon_b_fun(Q)-carbon_b_fun_demand(Q)},
-                         interval = c(0,300),
-                         extendInt = "yes")
+#Surplus or deficit of credits
+a_cnt_sold <- credit - a_cnt_demand
+b_cnt_sold <- credit - b_cnt_demand
+c_cnt_sold <- credit - c_cnt_demand
 
-equi_sector_c <- uniroot(function(Q){carbon_c_fun(Q)-carbon_c_fun_demand(Q)},
-                         interval = c(0,300),
-                         extendInt = "yes")
+# (1) Total Cost
+# This is similar to the tax question
+total_cost_cnt <-integrate(carbon_a_fun_demand, carbon_a_fun_inv(tax$mc),current_a)$value+
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),current_b)$value+
+  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),current_c)$value
+# (2) Sector cost
+# This is similar to the tax question
+sector_a_cost_tax <- integrate(carbon_a_fun_inv,carbon_a_fun_demand(tax$mc),current_a)$value
+sector_b_cost_tax <- integrate(carbon_b_fun_inv,carbon_b_fun_demand(tax$mc),current_b)$value
+sector_c_cost_tax <- integrate(carbon_c_fun_inv,carbon_c_fun_demand(tax$mc),current_c)$value
 
-
-
+# (3) No tax revenue
 ```
 
+Based off of these prices, Sectors A and B will only need `r a_cnt_demand` and `r b_cnt_demand` tons respectively. Sector C however has a demand of `r c_cnt_demand` tons, therefore they will purchase the remaining credits from Sectors A and B. 
 
 4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, and/or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market? Describe these incentives as quantitatively as possible.
 
