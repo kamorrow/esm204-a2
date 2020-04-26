@@ -297,69 +297,111 @@ carbon_d_fun_demand <- function(Q) {carbon_d_fun(current_d-Q)}
 
 
 ```{r}
-abate_range <- seq(0,300,by=1)
+abate_range <- seq(0, 300, by = 1)
+
 predict_supply <-  data.frame(abatement= abate_range, 
-  type = rep("Supply",length(abate_range)),
+  type = rep("Supply",
+             length(abate_range)),
   sector_a = carbon_a_fun(abate_range),
   sector_b = carbon_b_fun(abate_range),
   sector_c = carbon_c_fun(abate_range),
   sector_d = carbon_d_fun(abate_range)) %>% 
-  pivot_longer(cols = 3:6,values_to = "mc_predict",names_to = "sector",names_prefix = "sector_") 
+  pivot_longer(cols = 3:6,
+               values_to = "mc_predict",
+               names_to = "sector",
+               names_prefix = "sector_") 
 
 predict_demand <- data.frame(
   abatement= abate_range,
-  type = rep("Demand",length(abate_range)),
+  type = rep("Demand",
+             length(abate_range)),
   sector_a= carbon_a_fun_demand(abate_range),
   sector_b= carbon_b_fun_demand(abate_range),
   sector_c= carbon_c_fun_demand(abate_range),
   sector_d= carbon_d_fun_demand(abate_range) ) %>% 
-  pivot_longer(cols = 3:6,values_to = "mc_predict",names_to = "sector",names_prefix = "sector_")
+  pivot_longer(cols = 3:6,
+               values_to = "mc_predict",
+               names_to = "sector",
+               names_prefix = "sector_")
 
 predict_values <- predict_supply %>% 
   union(predict_demand) %>% 
-  arrange(sector,type,abatement)
+  arrange(sector,
+          type,
+          abatement) #%>%
+  # mutate(sector = case_when(
+  #   sector == "a" ~ "A",
+  #   sector == "b" ~ "B",
+  #   sector == "c" ~ "C",
+  #   sector == "d" ~ "D"
+  # ))
 ```
 
 
 ```{r}
-ggplot(data = predict_values)+
-  geom_path(aes(x=abatement,y=mc_predict,color=type))+
-  facet_wrap(~sector,scales = "free")
+ggplot(data = predict_values) +
+  geom_path(aes(x = abatement,
+                y = mc_predict,
+                color = type)) +
+  facet_wrap(~sector,
+             scales = "free")  +
+  labs(y = "Cost ($/ton)",
+       x = "Abatement (tons)",
+       title = "Supply & Demand by Sector",
+       # subtitle = "",
+       caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+  theme_minimal() +
+  theme(plot.caption = element_text(hjust = 0, face = "italic"),
+        legend.title = element_blank())
+  
 ```
 
 
 ```{r}
-predict_carbon_a_demand <- data.frame(mc_predict = predict(carbon_a_lm,carbon_a), sector = "A",
+# Sector A
+predict_carbon_a_demand <- data.frame(mc_predict = predict(carbon_a_lm,carbon_a), sector = "a",
                                    abatement = current_a-carbon_a$abatement)
 
+# Sector B
 predict_carbon_b_demand <- data.frame(mc_predict = predict(carbon_b_nls, current_b-carbon_b$abatement),
-                                   sector = "B",
+                                   sector = "b",
                                    abatement = current_b-carbon_b$abatement)
 
+# Sector C
 new_df <- data.frame(abatement = current_c-carbon_c_40$abatement)
+
 mc_predict <- predict(carbon_c_40_lm, newdata = new_df)
+
 predict_carbon_c_40_lm <- data.frame(new_df, mc_predict) %>% 
-  mutate(sector = "C")
-predict_c_stage <- data.frame(abatement = seq(0,30,by=10),sector = rep("C",4), mc_predict = rep(current_c-0,4))
+  mutate(sector = "c")
+
+predict_c_stage <- data.frame(abatement = seq(0, 30, by = 10),
+                              mc_predict = rep(current_c - 0, 4),
+                              sector = rep("c", 4))
+
 predict_carbon_c_40_lm_demand <- predict_carbon_c_40_lm %>% 
   union(predict_c_stage) %>% 
   arrange(abatement)
 
+# Sector D
 predict_carbon_d_nls_demand <- data.frame(mc_predict = predict(carbon_d_nls, current_d-carbon_d$abatement),
-                                   sector = "D",
+                                   sector = "d",
                                    abatement = carbon_d$abatement)
 
 predict_demand <- predict_carbon_a_demand %>% 
   rbind(predict_carbon_b_demand) %>%  
   rbind(predict_carbon_c_40_lm_demand) %>%  
   rbind(predict_carbon_d_nls_demand) %>% 
-  add_column(type = "demand")
+  add_column(type = "Demand")
 
 predict_values <- predict_values %>% union(predict_demand)
 
-ggplot(data = predict_values)+
-  geom_path(aes(x=abatement,y=mc_predict,color=type))+
-  facet_wrap(~sector)
+ggplot(data = predict_values) +
+  geom_point(aes(x = abatement, # changed from geom_path to see more
+                y = mc_predict,
+                color = type)) +
+  facet_wrap(~ sector,
+             scales = "free")
 
 ```
 
