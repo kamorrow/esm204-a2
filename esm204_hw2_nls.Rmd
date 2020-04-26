@@ -64,7 +64,7 @@ Your task is to produce a *1 page memo*, with supporting appendices, to advise c
 carbon_a <- carbon_long %>%
   filter(sector == "A")
 
-# Explroe data
+# Explore data
 ggplot(data = carbon_a) +
   geom_smooth(aes(x = abatement,
                   y = mc),
@@ -102,7 +102,7 @@ carbon_a_lm$coefficients[2]
 carbon_b <- carbon_long %>%
   filter(sector == "B")
 
-# Explroe data
+# Explore data
 ggplot(data = carbon_b) +
   geom_smooth(aes(x = abatement,
                   y = mc),
@@ -193,7 +193,7 @@ ggplot()+
 carbon_c <- carbon_long %>%
   filter(sector == "C")
 
-# Explroe data
+# Explore data
 ggplot(data = carbon_c) +
   geom_smooth(aes(x = abatement,
                   y = mc),
@@ -266,21 +266,73 @@ AIC(carbon_c_lm_poly3) # 138.3138
 #                                    sector = "B",
 #                                    abatement = carbon_c$abatement)
 
-predict_carbon_c_lm_poly2 <- data.frame(mc_predict = predict(carbon_c_lm_poly2,
-                                                            carbon_c$abatement),
-                                   sector = "C",
-                                   abatement = carbon_c$abatement)
+# predict_carbon_c_lm_poly2 <- data.frame(mc_predict = predict(carbon_c_lm_poly2,
+#                                                             carbon_c$abatement),
+#                                    sector = "C",
+#                                    abatement = carbon_c$abatement)
+
+ggplot()+
+  geom_point(data = carbon_c,
+             aes(x = abatement,
+                 y = mc)) #+
+  # geom_path(data = predict_carbon_c_lm_poly2,
+  #           aes(x = abatement,
+  #               y = mc_predict))
+
+
+```
+```{r}
+# Exploration of Sector C's values >40
+
+# subset for just Sector C
+carbon_c_40 <- carbon_long %>%
+  filter(sector == "C",
+         abatement > 39)
+
+# Model Exploration
+## Linear
+carbon_c_40_lm <- lm(mc ~ abatement,
+                  data = carbon_c_40)
+
+summary(carbon_c_40_lm)
+# Multiple R-squared:  0.9149,	Adjusted R-squared:  0.9063 
+AIC(carbon_c_40_lm) # 104.4639
+
+## Polynomial
+### Second Order
+carbon_c_40_lm_poly2 <- lm(mc ~ poly(abatement, 2),
+                        data = carbon_c_40)
+
+summary(carbon_c_40_lm_poly2)
+# Multiple R-squared:  0.9245,	Adjusted R-squared:  0.8962   
+AIC(carbon_c_40_lm_poly2) # 106.4456
+
+### Third Order
+carbon_c_40_lm_poly3 <- lm(mc ~ poly(abatement, 3),
+                        data = carbon_c_40)
+
+summary(carbon_c_40_lm_poly3)
+# Multiple R-squared:  0.9245,	Adjusted R-squared:  0.8962
+AIC(carbon_c_40_lm_poly3) # 107.0187
+
+
+new_df <- data.frame(abatement = carbon_c_40$abatement)
+
+mc_predict <- predict(carbon_c_40_lm, newdata = new_df)
+
+predict_carbon_c_40_lm <- data.frame(new_df, mc_predict)
+
 
 ggplot()+
   geom_point(data = carbon_c,
              aes(x = abatement,
                  y = mc)) +
-  geom_path(data = predict_carbon_c_lm_poly2,
+  geom_path(data = predict_carbon_c_40_lm,
             aes(x = abatement,
                 y = mc_predict))
-
-
 ```
+
+
 
 # Sector D
 ```{r}
@@ -288,7 +340,7 @@ ggplot()+
 carbon_d <- carbon_long %>%
   filter(sector == "D")
 
-# Explroe data
+# Explore data
 ggplot(data = carbon_d) +
   geom_smooth(aes(x = abatement,
                   y = mc),
@@ -355,9 +407,9 @@ AIC(carbon_d_nls) # 120.7116
 model_out <- broom::tidy(carbon_d_nls) # cleaner model output with broom
 model_out
 
-## Predicted values using the model for plotting
+## Predicted values using the nls model for plotting
 predict_carbon_d_nls <- data.frame(mc_predict = predict(carbon_d_nls, carbon_d$abatement),
-                                   sector = "B",
+                                   sector = "D",
                                    abatement = carbon_d$abatement)
 
 ggplot()+
