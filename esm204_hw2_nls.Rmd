@@ -480,9 +480,9 @@ tax <- carbon_agg %>% filter(round(agg)==300) %>%
 ```{r tax_answer}
 #(1) Total cost (equals tax revenue?)
 
-total_cost <-  integrate(carbon_a_fun_demand,0,tax$sector_a)+
-  integrate(carbon_b_fun_demand,0,tax$sector_b)+
-  integrate(carbon_c_fun_demand,0,tax$sector_c)
+total_cost <-  integrate(carbon_a_fun_demand, 0, tax$sector_a)$value+
+  integrate(carbon_b_fun_demand,0,tax$sector_b)$value+
+  integrate(carbon_c_fun_demand,0,tax$sector_c)$value
 
 #(2) Sector Cost 
 
