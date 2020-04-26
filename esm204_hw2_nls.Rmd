@@ -356,60 +356,8 @@ ggplot(data = predict_values) +
   
 ```
 
-<<<<<<< HEAD
-=======
-
-```{r}
-# Sector A
-predict_carbon_a_demand <- data.frame(mc_predict = predict(carbon_a_lm,carbon_a), sector = "a",
-                                   abatement = current_a-carbon_a$abatement)
-
-# Sector B
-predict_carbon_b_demand <- data.frame(mc_predict = predict(carbon_b_nls, current_b-carbon_b$abatement),
-                                   sector = "b",
-                                   abatement = current_b-carbon_b$abatement)
-
-# Sector C
-new_df <- data.frame(abatement = current_c-carbon_c_40$abatement)
-
-mc_predict <- predict(carbon_c_40_lm, newdata = new_df)
-
-predict_carbon_c_40_lm <- data.frame(new_df, mc_predict) %>% 
-  mutate(sector = "c")
-
-predict_c_stage <- data.frame(abatement = seq(0, 30, by = 10),
-                              mc_predict = rep(current_c - 0, 4),
-                              sector = rep("c", 4))
-
-predict_carbon_c_40_lm_demand <- predict_carbon_c_40_lm %>% 
-  union(predict_c_stage) %>% 
-  arrange(abatement)
-
-# Sector D
-predict_carbon_d_nls_demand <- data.frame(mc_predict = predict(carbon_d_nls, current_d-carbon_d$abatement),
-                                   sector = "d",
-                                   abatement = carbon_d$abatement)
-
-predict_demand <- predict_carbon_a_demand %>% 
-  rbind(predict_carbon_b_demand) %>%  
-  rbind(predict_carbon_c_40_lm_demand) %>%  
-  rbind(predict_carbon_d_nls_demand) %>% 
-  add_column(type = "Demand")
-
-predict_values <- predict_values %>% union(predict_demand)
-
-ggplot(data = predict_values) +
-  geom_point(aes(x = abatement, # changed from geom_path to see more
-                y = mc_predict,
-                color = type)) +
-  facet_wrap(~ sector,
-             scales = "free")
-
-```
 
 
-
->>>>>>> fb44c9410fcdd43fe1d1e67496117b4e6f3803c2
 2. Using these models (i.e. use the functions you have estimated, not the data themselves) and the current level of carbon emissions (provided above), derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first ton, second ton, etc.? Plot each sector’s demand curve for carbon emissions on a graph.
 
 
