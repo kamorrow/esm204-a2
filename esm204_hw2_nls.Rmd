@@ -212,6 +212,37 @@ ggplot(data = carbon_c) +
     theme_minimal() +
     theme(plot.caption = element_text(hjust = 0, face = "italic"))
 ```
+
+```{r}
+# Exploration of Sector C's values abatement > 40
+# subset for > 40
+carbon_c_40 <- carbon_long %>%
+  filter(sector == "C",
+         abatement > 39)
+
+ggplot() +
+  geom_smooth(data = carbon_c_40,
+              aes(x = abatement,
+                  y = mc),
+              color = "navy",
+              size = 0.2,
+              linetype = "dashed",
+              fill = "blue",
+              alpha = 0.3) +
+  geom_point(data = carbon_c,
+             aes(x = abatement,
+                 y = mc)) +
+  labs(y = "Cost ($/ton)",
+         x = "Abatement (tons)",
+         title = "Sector C",
+         subtitle = "Smoothed 40 and Above",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
+```
+
+
+
 ```{r}
 
 # Model Exploration
@@ -241,12 +272,6 @@ summary(carbon_c_lm_poly3)
 AIC(carbon_c_lm_poly3) # 138.3138
 
 
-# Exploration of Sector C's values abatement > 40
-# subset for > 40
-carbon_c_40 <- carbon_long %>%
-  filter(sector == "C",
-         abatement > 39)
-
 # Model Exploration
 ## Linear
 carbon_c_40_lm <- lm(mc ~ abatement,
@@ -273,20 +298,22 @@ summary(carbon_c_40_lm_poly3)
 # Multiple R-squared:  0.9245,	Adjusted R-squared:  0.8962
 AIC(carbon_c_40_lm_poly3) # 107.0187
 
-## Non-Linear
-
-# estimate growth rate (r) to be = carbon_c_lm$coefficients[2] ~ 1.13
-# estimate K to be 160
-# A = (K - P) / P = 80
 
 ### CAN'T GET NLS TO WORK HERE
 
-# carbon_c_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
-#                     data = carbon_c,
-#                     start = list(K = 200,
-#                                  A = 1,
-#                                  r = carbon_c_lm$coefficients[2]),
-#                     trace = TRUE)
+## Non-Linear
+
+# estimate growth rate (r) to be = carbon_c_lm_$coefficients[2] ~ 1.13
+# or carbon_c_40_lm$coefficients[2] ~ 1.39
+# estimate K to be 160
+# A = (K - P) / P = 801
+
+carbon_c_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
+                    data = carbon_c,
+                    start = list(K = 160,
+                                 A = 159,
+                                 r = carbon_c_40_lm$coefficients[2]),
+                    trace = TRUE)
 # 
 # summary(carbon_c_nls) # 
 # AIC(carbon_c_nls) # 
