@@ -262,15 +262,69 @@ A = `r model_out_d$estimate[2]`
 r = `r model_out_d$estimate[3]`
 # Question 1 Plot Output
 ```{r}
-predict_values <-  predict_carbon_a %>% 
-  rbind(predict_carbon_b_nls) %>%  
-  rbind(predict_carbon_c_40_lm) %>%  
-  rbind(predict_carbon_d_nls) %>% 
-  add_column(type = "supply")
+carbon_a_fun <- function(Q){
+  m <- as.numeric(carbon_a_lm$coefficients[2])
+  b <- as.numeric(carbon_a_lm$coefficients[1])
+  m*Q+b}
 
+carbon_a_fun_demand <- function(Q) {carbon_a_fun(current_a-Q)}
+
+carbon_b_fun <- function(Q){
+  K <- as.numeric(coefficients(carbon_b_nls)[1])
+  A <- as.numeric(coefficients(carbon_b_nls)[2])
+  r <- as.numeric(coefficients(carbon_b_nls)[3])
+  K/(1 + A*exp(-r*Q))
+     }
+
+carbon_b_fun_demand <- function(Q) {carbon_b_fun(current_b-Q)}
+
+carbon_c_fun <- function(Q){
+  m <- as.numeric(carbon_c_40_lm$coefficients[2])
+  b <- as.numeric(carbon_c_40_lm$coefficients[1])
+  ifelse(Q<40,0,m*Q+b)}
+
+carbon_c_fun_demand <- function(Q){ifelse(Q<40,carbon_c_fun(current_c),carbon_c_fun(current_c-Q+40))}
+
+carbon_d_fun <- function(Q){
+  K <- as.numeric(coefficients(carbon_d_nls)[1])
+  A <- as.numeric(coefficients(carbon_d_nls)[2])
+  r <- as.numeric(coefficients(carbon_d_nls)[3])
+  K/(1 + A*exp(-r*Q))
+     }
+
+carbon_d_fun_demand <- function(Q) {carbon_d_fun(current_d-Q)}
+```
+
+
+```{r}
+abate_range <- seq(0,300,by=1)
+predict_supply <-  data.frame(abatement= abate_range, 
+  type = rep("Supply",length(abate_range)),
+  sector_a = carbon_a_fun(abate_range),
+  sector_b = carbon_b_fun(abate_range),
+  sector_c = carbon_c_fun(abate_range),
+  sector_d = carbon_d_fun(abate_range)) %>% 
+  pivot_longer(cols = 3:6,values_to = "mc_predict",names_to = "sector",names_prefix = "sector_") 
+
+predict_demand <- data.frame(
+  abatement= abate_range,
+  type = rep("Demand",length(abate_range)),
+  sector_a= carbon_a_fun_demand(abate_range),
+  sector_b= carbon_b_fun_demand(abate_range),
+  sector_c= carbon_c_fun_demand(abate_range),
+  sector_d= carbon_d_fun_demand(abate_range) ) %>% 
+  pivot_longer(cols = 3:6,values_to = "mc_predict",names_to = "sector",names_prefix = "sector_")
+
+predict_values <- predict_supply %>% 
+  union(predict_demand) %>% 
+  arrange(sector,type,abatement)
+```
+
+
+```{r}
 ggplot(data = predict_values)+
   geom_path(aes(x=abatement,y=mc_predict,color=type))+
-  facet_wrap(~sector)
+  facet_wrap(~sector,scales = "free")
 ```
 
 
@@ -313,14 +367,45 @@ ggplot(data = predict_values)+
 
 2. Using these models (i.e. use the functions you have estimated, not the data themselves) and the current level of carbon emissions (provided above), derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first ton, second ton, etc.? Plot each sector’s demand curve for carbon emissions on a graph.
 
+
+Here, we converted from abatement cost to pollution demand. To do this, we substituted (Q0 - Q) for the abatement term.
+
+# A
+
+MCa = 0.513A + 1.662
+MWTPa = 0.513*(Q0-Q) + 1.662
+MWTPa = 0.513*(170 - Q) + 1.662
+
+
 ```{r}
+# Convert from abatement cost to pollution demand
+# Substitute (Q0-Q) for abatement
+
+# this chunk is getting grouchy with me so I just wrote out the equations above rather than trying to make them work as functions. If anyone knows how to do that, go for it! -Kazia
+
+
+
+
 
 ```
+
 
 
 3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
 
 a. Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100 tons (thus reducing total emissions from 600 down to 300).
+
+```{r}
+# (1) Total Cost
+total_cost <- integrate(carbon_a_fun,0,100)$value + integrate(carbon_b_fun,0,100)$value + integrate(carbon_c_fun,0,100)$value
+# (2) Cost or Benefit to each sector (negative is cost)
+sector_a_cost <-integrate(carbon_a_fun,0,100)$value
+sector_b_cost <-integrate(carbon_b_fun,0,100)$value
+sector_c_cost <-integrate(carbon_c_fun,0,100)$value
+# (3) There won't be any tax revenue here...
+```
+
+
 
 b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to find the tax that accomplishes the desired reduction.
 
