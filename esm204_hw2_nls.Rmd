@@ -424,7 +424,7 @@ carbon_b_fun_inv <- function(P){
 carbon_c_fun_inv <- function(P){
   m <- as.numeric(carbon_c_40_lm$coefficients[2])
   b <- as.numeric(carbon_c_40_lm$coefficients[1])
-  ifelse(P<=carbon_c_fun_demand(P),current_c-((P-b)/m),carbon_c_fun_demand(0))
+  ifelse(P<=carbon_c_fun_demand(0),current_c-((P-b)/m)+40,0)
 }
 
 
@@ -440,8 +440,7 @@ carbon_d_fun_inv <- function(P){
 ```{r}
 #Construct dataframe with dummy data between relevant P range where the final column give the aggregate
 mc_range <- seq(0,350,by=.01)
-carbon_agg <- data.frame(mc= mc_range, 
-  type = rep("",length(mc_range)),
+carbon_agg <- data.frame(mc= mc_range,
   sector_a = ifelse(carbon_a_fun_inv(mc_range)>0,carbon_a_fun_inv(mc_range),0),
   sector_b = ifelse(carbon_b_fun_inv(mc_range)>0,carbon_b_fun_inv(mc_range),0),
   sector_c = carbon_c_fun_inv(mc_range)) %>% 
@@ -457,13 +456,38 @@ ggplot(data = predict_values %>% filter(type=="Demand") %>% filter(sector!="d"))
 
 ggplot() +
   geom_path(data=carbon_agg, aes(x=agg,y=mc))+
-  geom_path(data=carbon_agg, aes(x=sector_a,y=mc),color="red")+
-  geom_path(data=carbon_agg, aes(x=sector_b,y=mc),color="green")+
-  geom_path(data=carbon_agg, aes(x=sector_c,y=mc),color="blue")+
+  geom_path(data=carbon_agg %>% mutate(agg_sup=agg), aes(x=agg,y=mc))+
+  # Here are some paths of the sectors if that would be helpful for a graph...
+  #geom_path(data=carbon_agg, aes(x=sector_a,y=mc),color="red")+
+  #geom_path(data=carbon_agg, aes(x=sector_b,y=mc),color="green")+
+  #geom_path(data=carbon_agg, aes(x=sector_c,y=mc),color="blue")+
   xlim(0,600)
 
 
+# find tax by looking at when agg = 300
+
+tax <- carbon_agg %>% filter(round(agg)==300) %>% 
+  summarize(mc=mean(mc),
+            sector_a=mean(sector_a),
+            sector_b=mean(sector_b),
+            sector_c=mean(sector_c),
+            agg=mean(agg)
+            )
+
+#(1,3) Total cost (equals tax revenue?)
+
+total_cost <-  integrate(carbon_a_fun_demand,0,tax$sector_a)+
+  integrate(carbon_b_fun_demand,0,tax$sector_b)+
+  integrate(carbon_c_fun_demand,0,tax$sector_c)
+
+#(2) Sector Cost 
+
+sector_a_cost_tax <- integrate(carbon_a_fun_demand,0,tax$sector_a)
+sector_b_cost_tax <- integrate(carbon_b_fun_demand,0,tax$sector_b)
+sector_c_cost_tax <- integrate(carbon_c_fun_demand,0,tax$sector_c)
+
 #
+
 ```
 
 c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
