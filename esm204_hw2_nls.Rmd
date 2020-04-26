@@ -328,18 +328,21 @@ predict_values <- predict_supply %>%
   union(predict_demand) %>% 
   arrange(sector,
           type,
-          abatement) #%>%
-  # mutate(sector = case_when(
-  #   sector == "a" ~ "A",
-  #   sector == "b" ~ "B",
-  #   sector == "c" ~ "C",
-  #   sector == "d" ~ "D"
-  # ))
+          abatement)
+
+predict_plot <- predict_values %>%
+  mutate(sector = case_when(
+    sector == "a" ~ "A",
+    sector == "b" ~ "B",
+    sector == "c" ~ "C",
+    sector == "d" ~ "D"
+  )) %>%
+  filter(mc_predict >= 0)
 ```
 
 
 ```{r supply_demand_plot}
-ggplot(data = predict_values) +
+ggplot(data = predict_plot) +
   geom_path(aes(x = abatement,
                 y = mc_predict,
                 color = type)) +
