@@ -269,9 +269,20 @@ predict_values <-  predict_carbon_a %>%
 
 2. Using these models (i.e. use the functions you have estimated, not the data themselves) and the current level of carbon emissions (provided above), derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first ton, second ton, etc.? Plot each sector’s demand curve for carbon emissions on a graph.
 
+
+Here, we converted from abatement cost to pollution demand. To do this, we substituted (Q0 - Q) for the abatement term.
+
+# A
+
+MCa = 0.513A + 1.662
+MWTPa = 0.513*()
 ```{r}
+# Convert from abatement cost to pollution demand
+# Substitute (Q0-Q) for abatement
+
 
 ```
+
 
 
 3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
