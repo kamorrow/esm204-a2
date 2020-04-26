@@ -483,15 +483,15 @@ tax <- carbon_agg %>% filter(round(agg)==300) %>%
 ```{r tax_answer}
 #(1) Total cost (equals tax revenue?)
 
-total_cost <-  integrate(carbon_a_fun_demand, 0, tax$sector_a)$value+
-  integrate(carbon_b_fun_demand,0,tax$sector_b)$value+
-  integrate(carbon_c_fun_demand,0,tax$sector_c)$value
+total_cost_tax <-  integrate(carbon_a_fun_demand, carbon_a_fun_demand(tax$sector_a),current_a)$value+
+  integrate(carbon_b_fun_demand,carbon_b_fun_demand(tax$sector_b),current_b)$value+
+  integrate(carbon_c_fun_demand,carbon_c_fun_demand(tax$sector_c),current_c)$value
 
 #(2) Sector Cost 
 
-sector_a_cost_tax <- integrate(carbon_a_fun_demand,0,tax$sector_a)
-sector_b_cost_tax <- integrate(carbon_b_fun_demand,0,tax$sector_b)
-sector_c_cost_tax <- integrate(carbon_c_fun_demand,0,tax$sector_c)
+sector_a_cost_tax <- integrate(carbon_a_fun_demand, carbon_a_fun_demand(tax$sector_a),current_a)$value+
+sector_b_cost_tax <- integrate(carbon_b_fun_demand,carbon_b_fun_demand(tax$sector_b),current_b)$value+
+sector_c_cost_tax <- integrate(carbon_c_fun_demand,carbon_c_fun_demand(tax$sector_c),current_c)$value
 
 #(3)
 tax_rev <- tax$agg*tax$mc
@@ -499,6 +499,28 @@ tax_rev <- tax$agg*tax$mc
 ```
 
 c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
+
+
+```{r}
+#Calculate equilibrium points for both Sectors A and C using uniroot
+
+equi_sector_a <- uniroot(function(Q){carbon_a_fun(Q)-carbon_a_fun_demand(Q)},
+                         interval = c(0,300),
+                         extendInt = "yes")
+
+# Equi point for B calculated to show that it is at 100 tons carbon, which checks out
+equi_sector_b <- uniroot(function(Q){carbon_b_fun(Q)-carbon_b_fun_demand(Q)},
+                         interval = c(0,300),
+                         extendInt = "yes")
+
+equi_sector_c <- uniroot(function(Q){carbon_c_fun(Q)-carbon_c_fun_demand(Q)},
+                         interval = c(0,300),
+                         extendInt = "yes")
+
+
+
+```
+
 
 4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, and/or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market? Describe these incentives as quantitatively as possible.
 
