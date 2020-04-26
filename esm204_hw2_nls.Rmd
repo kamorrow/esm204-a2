@@ -3,11 +3,11 @@ title: "ESM 204: Homework 2"
 subtitle: "Simulating a Carbon Market"
 author: "Anthony Luna, Kazia Mermel, & Keene Morrow"
 date: "4/27/2020"
-output: html_document
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 library(tidyverse)
 library(here)
@@ -58,30 +58,12 @@ To comply with the Paris Accord, governments around the world are seeking ways t
 Your task is to produce a *1 page memo*, with supporting appendices, to advise country X (and in some questions, country Y) about how best to reduce carbon emissions. Your memo and appendices must address the following questions.
 1. Start with sector A. Plot that sector’s marginal abatement cost estimates and write down a plausible functional form for the marginal cost of abatement. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms, and you don’t necessarily have to assume the same function for each sector. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
 
-# A
+# A - Choose first order polynomial (Linear)
 ```{r}
 # subset for just Sector A
 carbon_a <- carbon_long %>%
   filter(sector == "A")
 
-# Explore data
-ggplot(data = carbon_a) +
-  geom_smooth(aes(x = abatement,
-                  y = mc),
-              color = "dark red",
-              size = 0.2,
-              linetype = "dashed",
-              fill = "red",
-              alpha = 0.3) +
-  geom_point(aes(x = abatement,
-                 y = mc)) +
-  labs(y = "Cost ($/ton)",
-         x = "Abatement (tons)",
-         title = "Sector A",
-         # subtitle = "",
-         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
-    theme_minimal() +
-    theme(plot.caption = element_text(hjust = 0, face = "italic"))
 
 # Model Exploration
 ## Linear
@@ -96,33 +78,12 @@ carbon_a_lm$coefficients[2]
 ` r mc = carbon_a_lm$coefficients[2]*abatement + carbon_a_lm$coefficients[1]`
 
 
-# B
+# B - Choose Logistic Model
 ```{r}
 # subset for just Sector B
 carbon_b <- carbon_long %>%
   filter(sector == "B")
 
-# Explore data
-ggplot(data = carbon_b) +
-  geom_smooth(aes(x = abatement,
-                  y = mc),
-              color = "dark green",
-              size = 0.2,
-              linetype = "dashed",
-              fill = "green",
-              alpha = 0.3) +
-  geom_point(aes(x = abatement,
-                 y = mc)) +
-  labs(y = "Cost ($/ton)",
-         x = "Abatement (tons)",
-         title = "Sector B",
-         # subtitle = "",
-         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
-    theme_minimal() +
-    theme(plot.caption = element_text(hjust = 0, face = "italic"))
-```
-
-```{r}
 # Model Exploration
 ## Linear
 carbon_b_lm <- lm(mc ~ abatement, data = carbon_b)
@@ -159,121 +120,25 @@ ggplot()+
             aes(x = abatement,
                 y = mc_predict))
  
-#Here is some code Anthony Used for ecology assignment two. I've repurposed it for this assignment.
-# Fit a linear model used for 'automatic good guess'
-#fit.lm <- lm(mc~abatement , data = carbon_c)
-#
-## 'Automatic good guess' for use in model
-#y0.ini <- fit.lm$coefficients[1]
-#b.ini <- fit.lm$coefficients[2]
-#x0.ini <- mean(carbon_b$abatement)
-#
-## Defining our linear with lower plateau function as described in Grassini et al. 2013
-#linplat <-  function(x,y0,b,x0){ifelse(x<=x0, y0,y0+b*(x-x0))}
-#
-## nls model using the defined LLP and using starting values from our 'automatic good guess'
-#LLP_carbon_c_model <-  nls(mc~linplat(abatement, y0, b, x0),
-#             data = carbon_c,
-#             start = list(y0=y0.ini,b=b.ini,x0=x0.ini),
-#             trace=FALSE,
-#             nls.control(maxiter=10000))
-#
-## Predicted values using the model for plotting
-#predict_LLP_carbon_c <- data.frame(abatement_predict = predict(LLP_carbon_b_model,carbon_c),sector = "C",
-#carbon_c$abatement)
+
 
 ```
 
+ 
 
-
-
-# C
+# C - CHoose Piecewise
 ```{r}
 # subset for just Sector C
 carbon_c <- carbon_long %>%
   filter(sector == "C")
 
-# Explore data
-ggplot(data = carbon_c) +
-  geom_smooth(aes(x = abatement,
-                  y = mc),
-              color = "navy",
-              size = 0.2,
-              linetype = "dashed",
-              fill = "blue",
-              alpha = 0.3) +
-  geom_point(aes(x = abatement,
-                 y = mc)) +
-  labs(y = "Cost ($/ton)",
-         x = "Abatement (tons)",
-         title = "Sector C",
-         # subtitle = "",
-         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
-    theme_minimal() +
-    theme(plot.caption = element_text(hjust = 0, face = "italic"))
-```
-
-```{r}
 # Exploration of Sector C's values abatement > 40
 # subset for > 40
 carbon_c_40 <- carbon_long %>%
   filter(sector == "C",
          abatement > 39)
-
-ggplot() +
-  geom_smooth(data = carbon_c_40,
-              aes(x = abatement,
-                  y = mc),
-              color = "navy",
-              size = 0.2,
-              linetype = "dashed",
-              fill = "blue",
-              alpha = 0.3) +
-  geom_point(data = carbon_c,
-             aes(x = abatement,
-                 y = mc)) +
-  labs(y = "Cost ($/ton)",
-         x = "Abatement (tons)",
-         title = "Sector C",
-         subtitle = "Smoothed 40 and Above",
-         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
-    theme_minimal() +
-    theme(plot.caption = element_text(hjust = 0, face = "italic"))
-```
-
-
-
-```{r}
-
 # Model Exploration
-## Linear
-carbon_c_lm <- lm(mc ~ abatement,
-                  data = carbon_c)
-
-summary(carbon_c_lm)
-# Multiple R-squared:  0.9024,	Adjusted R-squared:  0.8954 
-AIC(carbon_c_lm) # 142.314
-
-## Polynomial
-### Second Order
-carbon_c_lm_poly2 <- lm(mc ~ poly(abatement, 2),
-                        data = carbon_c)
-
-summary(carbon_c_lm_poly2)
-# Multiple R-squared:  0.9369,	Adjusted R-squared:  0.9272 
-AIC(carbon_c_lm_poly2) # 137.3369
-
-### Third Order
-carbon_c_lm_poly3 <- lm(mc ~ poly(abatement, 3),
-                        data = carbon_c)
-
-summary(carbon_c_lm_poly3)
-# Multiple R-squared:  0.9408,	Adjusted R-squared:  0.926 
-AIC(carbon_c_lm_poly3) # 138.3138
-
-
-# Model Exploration
-## Linear
+## Linear - Abatement greater than 40
 carbon_c_40_lm <- lm(mc ~ abatement,
                   data = carbon_c_40)
 
@@ -281,54 +146,6 @@ summary(carbon_c_40_lm)
 # Multiple R-squared:  0.9149,	Adjusted R-squared:  0.9063 
 AIC(carbon_c_40_lm) # 104.4639
 
-## Polynomial
-### Second Order
-carbon_c_40_lm_poly2 <- lm(mc ~ poly(abatement, 2),
-                        data = carbon_c_40)
-
-summary(carbon_c_40_lm_poly2)
-# Multiple R-squared:  0.9245,	Adjusted R-squared:  0.8962   
-AIC(carbon_c_40_lm_poly2) # 106.4456
-
-### Third Order
-carbon_c_40_lm_poly3 <- lm(mc ~ poly(abatement, 3),
-                        data = carbon_c_40)
-
-summary(carbon_c_40_lm_poly3)
-# Multiple R-squared:  0.9245,	Adjusted R-squared:  0.8962
-AIC(carbon_c_40_lm_poly3) # 107.0187
-
-
-### CAN'T GET NLS TO WORK HERE
-
-## Non-Linear
-
-# estimate growth rate (r) to be = carbon_c_lm_$coefficients[2] ~ 1.13
-# or carbon_c_40_lm$coefficients[2] ~ 1.39
-# estimate K to be 160
-# A = (K - P) / P = 801
-
-carbon_c_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
-                    data = carbon_c,
-                    start = list(K = 160,
-                                 A = 159,
-                                 r = carbon_c_40_lm$coefficients[2]),
-                    trace = TRUE)
-# 
-# summary(carbon_c_nls) # 
-# AIC(carbon_c_nls) # 
-# 
-# model_out <- broom::tidy(carbon_c_nls) # cleaner model output with broom
-# model_out
-
-
-## Predicted values using the model for plotting
-# ALL DATA (red)
-new_df <- data.frame(abatement = carbon_c$abatement)
-
-mc_predict <- predict(carbon_c_lm_poly2, newdata = new_df)
-
-predict_carbon_c_lm <- data.frame(new_df, mc_predict)
 
 # > 40 (blue)
 
@@ -336,17 +153,19 @@ new_df <- data.frame(abatement = carbon_c_40$abatement)
 
 mc_predict <- predict(carbon_c_40_lm, newdata = new_df)
 
-predict_carbon_c_40_lm <- data.frame(new_df, mc_predict)
+predict_carbon_c_40_lm <- data.frame(new_df, mc_predict) %>% 
+  mutate(sector = "C")
+
+predict_c_stage <- data.frame(abatement = seq(0,30,by=10),sector = rep("C",4), mc_predict = rep(0,4))
+
+predict_carbon_c_40_lm <- predict_carbon_c_40_lm %>% 
+  union(predict_c_stage)
 
 # Comparison
 ggplot()+
   geom_point(data = carbon_c,
              aes(x = abatement,
                  y = mc)) +
-  geom_path(data = predict_carbon_c_lm,
-            aes(x = abatement,
-                y = mc_predict),
-            color = "red") +
   geom_path(data = predict_carbon_c_40_lm,
             aes(x = abatement,
                 y = mc_predict),
@@ -357,66 +176,19 @@ ggplot()+
 ```
 
 
-# Sector D
+# Sector D - Choose Logistic Model
 ```{r}
 # subset for just Sector C
 carbon_d <- carbon_long %>%
   filter(sector == "D")
 
-# Explore data
-ggplot(data = carbon_d) +
-  geom_smooth(aes(x = abatement,
-                  y = mc),
-              color = "purple",
-              size = 0.2,
-              linetype = "dashed",
-              fill = "purple",
-              alpha = 0.3) +
-  geom_point(aes(x = abatement,
-                 y = mc)) +
-  labs(y = "Cost ($/ton)",
-         x = "Abatement (tons)",
-         title = "Sector D",
-         # subtitle = "",
-         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
-    theme_minimal() +
-    theme(plot.caption = element_text(hjust = 0, face = "italic"))
-```
-
-```{r}
-
 # Model Exploration
-## Linear
-carbon_d_lm <- lm(mc ~ abatement,
-                  data = carbon_d)
-
-summary(carbon_d_lm)
-# Multiple R-squared:  0.8335,	Adjusted R-squared:  0.8216 
-AIC(carbon_d_lm) # 129.2919
-
-## Polynomial
-### Second Order
-carbon_d_lm_poly2 <- lm(mc ~ poly(abatement, 2),
-                        data = carbon_d)
-
-summary(carbon_d_lm_poly2)
-# Multiple R-squared:  0.9099,	Adjusted R-squared:  0.896 
-AIC(carbon_d_lm_poly2) # 121.4675
-
-### Third Order
-carbon_d_lm_poly3 <- lm(mc ~ poly(abatement, 3),
-                        data = carbon_d)
-
-summary(carbon_d_lm_poly3)
-# Multiple R-squared:  0.9099,	Adjusted R-squared:  0.8874 
-AIC(carbon_d_lm_poly3) # 123.4675
-
 ## Non-Linear
 
 # estimate growth rate (r) to be = carbon_d_lm$coefficients[2] ~ 
 # estimate K to be 85
 # A = (K - P) / P = 
-
+carbon_d_lm <- lm(mc ~abatement,data=carbon_d)
 carbon_d_nls <- nls(mc ~ K/(1 + A*exp(-r*abatement)),
                     data = carbon_d,
                     start = list(K = 112,
@@ -436,14 +208,6 @@ predict_carbon_d_nls <- data.frame(mc_predict = predict(carbon_d_nls, carbon_d$a
                                    abatement = carbon_d$abatement)
 
 ggplot()+
-  # geom_smooth(data = carbon_d,
-  #             aes(x = abatement,
-  #                 y = mc),
-  #             color = "purple",
-  #             size = 0.2,
-  #             linetype = "dashed",
-  #             fill = "purple",
-  #             alpha = 0.3) +
   geom_point(data = carbon_d,
              aes(x = abatement,
                  y = mc)) +
@@ -461,6 +225,15 @@ ggplot()+
 
 ```
 
+```{r}
+predict_carbon_a <- predict(carbon_a_lm,carbon_a)
+predict_values <-  predict_carbon_a %>% 
+  rbind(predict_carbon_b_nls) %>%  
+  rbind(predict_carbon_c_40_lm) %>%  
+  rbind(predict_carbon_d_nls)
+
+
+```
 
 
 
