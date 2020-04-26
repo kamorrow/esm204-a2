@@ -73,6 +73,10 @@ summary(carbon_a_lm)
 carbon_a_lm$coefficients[1]
 carbon_a_lm$coefficients[2]
 
+# Create Data Frame
+predict_carbon_a <- data.frame(mc_predict = predict(carbon_a_lm,carbon_a), sector = "A",
+                                   abatement = carbon_a$abatement)
+
 ```
 
 *Sector A Equation is:*
@@ -169,7 +173,8 @@ predict_carbon_c_40_lm <- data.frame(new_df, mc_predict) %>%
 predict_c_stage <- data.frame(abatement = seq(0,30,by=10),sector = rep("C",4), mc_predict = rep(0,4))
 
 predict_carbon_c_40_lm <- predict_carbon_c_40_lm %>% 
-  union(predict_c_stage)
+  union(predict_c_stage) %>% 
+  arrange(abatement)
 
 # Comparison
 ggplot()+
@@ -226,6 +231,7 @@ predict_carbon_d_nls <- data.frame(mc_predict = predict(carbon_d_nls, carbon_d$a
                                    sector = "D",
                                    abatement = carbon_d$abatement)
 
+
 ggplot()+
   geom_point(data = carbon_d,
              aes(x = abatement,
@@ -254,14 +260,52 @@ K = `r model_out_d$estimate[1]`
 A = `r model_out_d$estimate[2]`
 
 r = `r model_out_d$estimate[3]`
-
+# Question 1 Plot Output
 ```{r}
-predict_carbon_a <- predict(carbon_a_lm,carbon_a)
 predict_values <-  predict_carbon_a %>% 
   rbind(predict_carbon_b_nls) %>%  
   rbind(predict_carbon_c_40_lm) %>%  
-  rbind(predict_carbon_d_nls)
+  rbind(predict_carbon_d_nls) %>% 
+  add_column(type = "supply")
 
+ggplot(data = predict_values)+
+  geom_path(aes(x=abatement,y=mc_predict,color=type))+
+  facet_wrap(~sector)
+```
+
+
+```{r}
+predict_carbon_a_demand <- data.frame(mc_predict = predict(carbon_a_lm,carbon_a), sector = "A",
+                                   abatement = current_a-carbon_a$abatement)
+
+predict_carbon_b_demand <- data.frame(mc_predict = predict(carbon_b_nls, current_b-carbon_b$abatement),
+                                   sector = "B",
+                                   abatement = current_b-carbon_b$abatement)
+
+new_df <- data.frame(abatement = current_c-carbon_c_40$abatement)
+mc_predict <- predict(carbon_c_40_lm, newdata = new_df)
+predict_carbon_c_40_lm <- data.frame(new_df, mc_predict) %>% 
+  mutate(sector = "C")
+predict_c_stage <- data.frame(abatement = seq(0,30,by=10),sector = rep("C",4), mc_predict = rep(current_c-0,4))
+predict_carbon_c_40_lm_demand <- predict_carbon_c_40_lm %>% 
+  union(predict_c_stage) %>% 
+  arrange(abatement)
+
+predict_carbon_d_nls_demand <- data.frame(mc_predict = predict(carbon_d_nls, current_d-carbon_d$abatement),
+                                   sector = "D",
+                                   abatement = carbon_d$abatement)
+
+predict_demand <- predict_carbon_a_demand %>% 
+  rbind(predict_carbon_b_demand) %>%  
+  rbind(predict_carbon_c_40_lm_demand) %>%  
+  rbind(predict_carbon_d_nls_demand) %>% 
+  add_column(type = "demand")
+
+predict_values <- predict_values %>% union(predict_demand)
+
+ggplot(data = predict_values)+
+  geom_path(aes(x=abatement,y=mc_predict,color=type))+
+  facet_wrap(~sector)
 
 ```
 
