@@ -497,9 +497,9 @@ total_cost_tax <-  integrate(carbon_a_fun_demand, carbon_a_fun_inv(tax$mc),curre
 
 #(2) Sector Cost This is just the total cost broken up by sector
 
-sector_a_cost_tax <- integrate(carbon_a_fun_inv,carbon_a_fun_demand(tax$mc),current_a)$value
-sector_b_cost_tax <- integrate(carbon_b_fun_inv,carbon_b_fun_demand(tax$mc),current_b)$value
-sector_c_cost_tax <- integrate(carbon_c_fun_inv,carbon_c_fun_demand(tax$mc),current_c)$value
+sector_a_cost_tax <- integrate(carbon_a_fun_demand,carbon_a_fun_inv(tax$mc),current_a)$value
+sector_b_cost_tax <- integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),current_b)$value
+sector_c_cost_tax <- integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),current_c)$value
 
 #(3) There are a couple ways to calculate this but this is the easiest.
 tax_rev <- tax$agg*tax$mc
@@ -528,11 +528,16 @@ c_cnt_sold <- credit - c_cnt_demand
 total_cost_cnt <-integrate(carbon_a_fun_demand, carbon_a_fun_inv(tax$mc),current_a)$value+
   integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),current_b)$value+
   integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),current_c)$value
+
 # (2) Sector cost
-# This is similar to the tax question
-sector_a_cost_tax <- integrate(carbon_a_fun_inv,carbon_a_fun_demand(tax$mc),current_a)$value
-sector_b_cost_tax <- integrate(carbon_b_fun_inv,carbon_b_fun_demand(tax$mc),current_b)$value
-sector_c_cost_tax <- integrate(carbon_c_fun_inv,carbon_c_fun_demand(tax$mc),current_c)$value
+# This is similar to the tax question. Add the extra area to calculation such that the sold/purchased credits are accounted for
+sector_a_cost_cnt <-  integrate(carbon_a_fun_demand,carbon_a_fun_inv(tax$mc),current_a)$value-
+  integrate(carbon_a_fun_demand,carbon_a_fun_inv(tax$mc),100)$value
+sector_b_cost_cnt <-  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),current_b)$value-
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),100)$value
+sector_c_cost_cnt <-  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),current_c)$value+
+  integrate(carbon_a_fun_demand,carbon_a_fun_inv(tax$mc),100)$value+
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),100)$value
 
 # (3) No tax revenue
 ```
@@ -541,4 +546,26 @@ Based off of these prices, Sectors A and B will only need `r a_cnt_demand` and `
 
 4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, and/or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market? Describe these incentives as quantitatively as possible.
 
+```{r}
+# Carbon_agg as calculated above, but with sector d included
+carbon_agg_d <- data.frame(mc= mc_range,
+  sector_a = ifelse(carbon_a_fun_inv(mc_range)>0,carbon_a_fun_inv(mc_range),0),
+  sector_b = ifelse(carbon_b_fun_inv(mc_range)>0,carbon_b_fun_inv(mc_range),0),
+  sector_c = carbon_c_fun_inv(mc_range),
+  sector_d = ifelse(carbon_d_fun_inv(mc_range)>0,carbon_d_fun_inv(mc_range),0)) %>% 
+  mutate(agg = sector_a+sector_b+sector_c+sector_d)
+
+
+# named tax_d for convention but really gives the socailly optimal 
+# price of carbon under this scenario. THere is a decrease in the 
+# price meaning higher reductions possibly?
+tax_d <- carbon_agg_d %>% filter(round(agg)==600) %>% 
+  summarize(mc=mean(mc),
+            sector_a=mean(sector_a),
+            sector_b=mean(sector_b),
+            sector_c=mean(sector_c),
+            sector_d=mean(sector_d),
+            agg=mean(agg)
+            )
+```
 
