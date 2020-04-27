@@ -630,9 +630,14 @@ d_cnt_sold <- 300 - d_cnt_demand
 
 # (1) Total Cost
 # This is similar to the tax question
-# total_cost_cnt <-integrate(carbon_a_fun_demand, carbon_a_fun_inv(tax$mc),current_a)$value+
-#   integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax$mc),current_b)$value+
-#   integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),current_c)$value
+total_cost_cnt2 <-integrate(carbon_a_fun_demand, carbon_a_fun_inv(tax_d$mc),current_a)$value+
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax_d$mc),current_b)$value+
+  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax_d$mc),current_c)$value +
+  integrate(carbon_d_fun_demand,carbon_d_fun_inv(tax_d$mc),current_d)$value 
+
+total_cost_cnt2_x <-integrate(carbon_a_fun_demand, carbon_a_fun_inv(tax_d$mc),current_a)$value+
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax_d$mc),current_b)$value+
+  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax_d$mc),current_c)$value
 
 # (2) Sector cost
 # This is similar to the tax question. Add the extra area to calculation such that the sold/purchased credits are accounted for

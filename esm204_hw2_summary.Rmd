@@ -40,15 +40,6 @@ current_d <- 300
 
 ***
 
-To comply with the Paris Accord, governments around the world are seeking ways to reduce carbon emissions. You have been asked to provide guidance on how country “X” can most efficiently reduce carbon emissions. In this homework you will conduct data analysis, simulations, and policy analysis to help inform this decision. The data for this assignment are available in the file “HW2Data.csv”, available on Gauchospace. The data contain estimates of the marginal cost of carbon abatement for four economic sectors (sectors A, B, C, and D), for different levels of abatement. A few notes:
-
-- Current carbon emissions in the sectors are: (A=170, B=200, C=230, and D=300).
-- Sectors A, B, and C are in country X. Sector D is in a different country, Y.
-- Prices are in $/ton and quantities are in tons.
-
-Your task is to produce a *1 page memo*, with supporting appendices, to advise country X (and in some questions, country Y) about how best to reduce carbon emissions. Your memo and appendices must address the following questions.
-1. Start with sector A. Plot that sector’s marginal abatement cost estimates and write down a plausible functional form for the marginal cost of abatement. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms, and you don’t necessarily have to assume the same function for each sector. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
-
 ### 1.
 
 Various models were explored for each sector.  The model with the best fit was selected by comparing R^2 and AIC values for each model, as appropriate.
