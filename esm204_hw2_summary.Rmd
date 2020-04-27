@@ -478,7 +478,7 @@ ggplot() +
        x = "Carbon (tons)",
        title = "Emission Reduction Through Taxation",
        subtitle = "Demand & Tax Level",
-       caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+       caption = "Figure 2.\nESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
   theme_minimal() +
   theme(plot.caption = element_text(hjust = 0, face = "italic")) +
   # Labels
@@ -535,7 +535,7 @@ tax_rev <- tax$agg*tax$mc
 
 ```
 
-The tax to produce the desired reduction was calculated by expressing the functions for the sectors of interest in terms of abatement/pollution, then calculating the price where for the appropriate abatement level (300 tons). This allowed the total cost of the tax to be calculated by integrating each sector's function from the desired carbon emission that would be accomplished by the tax to the quantity of carbon currently emitted.  The total cost of the tax was found by summing those values and the tax revenue by multiplying the tax (\$`r round(tax$mc, 2)`/ton) by the emission level (300 tons).
+Referencing Figure 2, the tax to produce the desired reduction was calculated by expressing the functions for the sectors of interest in terms of abatement/pollution, then the price was calcualted for the appropriate abatement level (300 tons). This allowed the total cost of the tax to be calculated by integrating each sector's function from the desired carbon emission that would be accomplished by the tax to the quantity of carbon currently emitted.  The total cost of the tax was found by summing those values and the tax revenue by multiplying the tax (\$`r round(tax$mc, 2)`/ton) by the emission level (300 tons).
 
 
 #### c.

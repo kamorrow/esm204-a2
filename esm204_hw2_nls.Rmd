@@ -359,6 +359,8 @@ ggplot(data = predict_plot) +
   theme_minimal() +
   theme(plot.caption = element_text(hjust = 0, face = "italic"),
         legend.title = element_blank())
+
+# ggsave(here::here("figures", "figure_1.png"), width = 7, height = 5)
   
 ```
 
@@ -484,7 +486,7 @@ ggplot() +
        x = "Carbon (tons)",
        title = "",
        # subtitle = "",
-       caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+       caption = "Figure 2.\nESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
   theme_minimal() +
   theme(plot.caption = element_text(hjust = 0, face = "italic")) +
   # Labels
@@ -514,7 +516,7 @@ ggplot() +
             color = "grey",
             hjust = 0)
 
-
+# ggsave(here::here("figures", "figure_2.png"), width = 7, height = 5)
 
 ```
 
