@@ -348,7 +348,6 @@ ggplot(data = predict_plot) +
                 color = type)) +
  facet_wrap(~sector,
              scales = "free")  +
-  
   labs(y = "Cost ($/ton)",
        x = "Carbon (tons)",
        title = "Supply & Demand by Sector",
@@ -462,12 +461,45 @@ ggplot() +
   geom_path(data=carbon_agg, aes(x=agg,y=mc))+
   geom_path(data=carbon_agg %>% mutate(agg_sup=agg), aes(x=agg,y=mc))+
   # Here are some paths of the sectors if that would be helpful for a graph...
-  geom_path(data=carbon_agg, aes(x=sector_a,y=mc),color="red")+
-  geom_path(data=carbon_agg, aes(x=sector_b,y=mc),color="green")+
-  geom_path(data=carbon_agg, aes(x=sector_c,y=mc),color="blue")+
+  geom_path(data=carbon_agg, aes(x=sector_a,y=mc),color="red") +
+  geom_path(data=carbon_agg, aes(x=sector_b,y=mc),color="dark green") +
+  geom_path(data=carbon_agg, aes(x=sector_c,y=mc),color="blue") +
   # here is the tax line...
   geom_hline(yintercept = tax$mc,linetype="dashed",color="gray")+
-  xlim(0,600)
+  xlim(0,600)   +
+  labs(y = "Cost ($/ton)",
+       x = "Carbon (tons)",
+       title = "",
+       # subtitle = "",
+       caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+  theme_minimal() +
+  theme(plot.caption = element_text(hjust = 0, face = "italic")) +
+  # Labels
+  geom_text(aes(x = 50,
+                y = 25),
+            label = "Sector A",
+            color = "red",
+            hjust = 0) +
+  geom_text(aes(x = 100,
+                y = 75),
+            label = "Sector B",
+            color = "dark green",
+            hjust = 0) +
+  geom_text(aes(x = 100,
+                y = 200),
+            label = "Sector C",
+            color = "blue",
+            hjust = 0) +
+  geom_text(aes(x = 500,
+                y = 35),
+            label = "Aggregate",
+            color = "black",
+            hjust = 0) +
+  geom_text(aes(x = 500,
+                y = 75),
+            label = "Tax",
+            color = "grey",
+            hjust = 0)
 
 
 # find tax by looking at when agg = 300
