@@ -508,8 +508,6 @@ ggplot() +
             color = "grey",
             hjust = 0)
 
-
-
 ```
 
 
@@ -542,7 +540,8 @@ The tax to produce the desired reduction was calculated by expressing the functi
 
 #### c.
 
-The calculated tax above is the idealized price to achieve reduction of 300. Therefore we use this as the universal price of carbon to see emissions of each sector. Based on this, there will be a surplus of carbon credits for some sectors, and a deficit for other.
+Using the tax calculated above as the price to achieve a reduction of 300 tons of carbon emissions, the demand for carbon for each sector was calculated.  The difference between the allocated 100 tons of carbon emissions and the demand was calculated, then used to determine the cost or benefit to each sector at their respective equilibriums  The total cost of the program was calculated and found to be the same as the total cost of the tax in part b.  There is no tax revenue associated with this scenario.
+
 ```{r}
 #Allocated at start
 credit <- 100
@@ -575,8 +574,6 @@ sector_c_cost_cnt <-  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),cur
 
 # (3) No tax revenue
 ```
-
-Based off of these prices, Sectors A and B will only need `r round(a_cnt_demand, 2)` and `r round(b_cnt_demand, 2)` tons respectively. Sector C however has a demand of `r round(c_cnt_demand, 2)` tons, therefore they will purchase the remaining credits from Sectors A and B. 
 
 ### 4.
 
