@@ -73,6 +73,21 @@ carbon_a_lm$coefficients[2]
 predict_carbon_a <- data.frame(mc_predict = predict(carbon_a_lm,carbon_a), sector = "A",
                                    abatement = carbon_a$abatement)
 
+ggplot()+
+  geom_point(data = carbon_a,
+             aes(x = abatement,
+                                 y = mc)) +
+  geom_path(data = predict_carbon_a,
+            aes(x = abatement,
+                y = mc_predict)) +
+  labs(y = "Cost ($/ton)",
+         x = "Carbon (tons)",
+         title = "Sector A",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
+
 ```
 
 *Linear model equation:*
@@ -120,7 +135,14 @@ ggplot()+
                                  y = mc)) +
   geom_path(data = predict_carbon_b_nls,
             aes(x = abatement,
-                y = mc_predict))
+                y = mc_predict)) +
+  labs(y = "Cost ($/ton)",
+         x = "Carbon (tons)",
+         title = "Sector B",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
  
 
 
@@ -175,7 +197,14 @@ ggplot()+
   geom_path(data = predict_carbon_c_40_lm,
             aes(x = abatement,
                 y = mc_predict),
-            color = "blue")
+            color = "blue") +
+  labs(y = "Cost ($/ton)",
+         x = "Carbon (tons)",
+         title = "Sector C",
+         # subtitle = "",
+         caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
+    theme_minimal() +
+    theme(plot.caption = element_text(hjust = 0, face = "italic"))
 ```
 
 *Piecewise linear model equation:*
@@ -224,7 +253,7 @@ ggplot()+
             aes(x = abatement,
                 y = mc_predict)) +
   labs(y = "Cost ($/ton)",
-         x = "Abatement (tons)",
+         x = "Carbon (tons)",
          title = "Sector D",
          # subtitle = "",
          caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
@@ -323,7 +352,7 @@ predict_plot <- predict_values %>%
 
 ### 2. 
 
-#### SUpply Curves
+#### Supply Curves
 
 The above functions were used to calculate values for supply in a range of possible levels of abatement/pollution from 0 to 300 tons of carbon.  These values were then plotted in Figure 1.
 
@@ -347,11 +376,7 @@ ggplot(data = predict_plot) +
 
 ### 3.
 
-Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
-
 #### a.
-
-Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100 tons (thus reducing total emissions from 600 down to 300).
 
 ```{r}
 # (1) Total Cost
@@ -363,11 +388,9 @@ sector_c_cost <-integrate(carbon_c_fun,0,100)$value
 # (3) There won't be any tax revenue here...
 ```
 
-The abatement cost for each sector (A, B, and C) was calculated by integrating the functions derived previously from 0 to 100 tons of carbon.  Total cost was calculated as the sum of all sectors.
+The cost of abatement for each sector (A, B, and C) was calculated by integrating the functions derived previously from 0 to 100 tons of carbon.  Total cost was calculated as the sum of all sectors.
 
 #### b.
-
-Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to find the tax that accomplishes the desired reduction.
 
 ```{r}
 # Inverse all three demand functions and handle edge cases (changing NAs to Zero etc)
@@ -425,14 +448,14 @@ tax <- carbon_agg %>% filter(round(agg)==300) %>%
 
 
 # Plot to check that the aggregate values look about right...
-ggplot(data = predict_values %>%
-         filter(type == "Demand") %>%
-         filter(sector!= "d")) +
-  geom_path(aes(x = abatement,
-                y = mc_predict,
-                color = sector)) +
-  ylim(0,300) +
-  xlim(0,600)
+# ggplot(data = predict_values %>%
+#          filter(type == "Demand") %>%
+#          filter(sector!= "d")) +
+#   geom_path(aes(x = abatement,
+#                 y = mc_predict,
+#                 color = sector)) +
+#   ylim(0,300) +
+#   xlim(0,600)
 
 ggplot() +
   geom_path(data = carbon_agg, 
@@ -453,8 +476,8 @@ ggplot() +
   xlim(0,600)   +
   labs(y = "Cost ($/ton)",
        x = "Carbon (tons)",
-       title = "",
-       # subtitle = "",
+       title = "Emission Reduction Through Taxation",
+       subtitle = "Demand & Tax Level",
        caption = "ESM 204 Spring 2020\nAnthony Luna, Kazia Mermel, & Keene Morrow") + 
   theme_minimal() +
   theme(plot.caption = element_text(hjust = 0, face = "italic")) +
@@ -519,8 +542,6 @@ The tax to produce the desired reduction was calculated by expressing the functi
 
 #### c.
 
-Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
-
 The calculated tax above is the idealized price to achieve reduction of 300. Therefore we use this as the universal price of carbon to see emissions of each sector. Based on this, there will be a surplus of carbon credits for some sectors, and a deficit for other.
 ```{r}
 #Allocated at start
@@ -555,11 +576,9 @@ sector_c_cost_cnt <-  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax$mc),cur
 # (3) No tax revenue
 ```
 
-Based off of these prices, Sectors A and B will only need `r a_cnt_demand` and `r b_cnt_demand` tons respectively. Sector C however has a demand of `r c_cnt_demand` tons, therefore they will purchase the remaining credits from Sectors A and B. 
+Based off of these prices, Sectors A and B will only need `r round(a_cnt_demand, 2)` and `r round(b_cnt_demand, 2)` tons respectively. Sector C however has a demand of `r round(c_cnt_demand, 2)` tons, therefore they will purchase the remaining credits from Sectors A and B. 
 
 ### 4.
-
-Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, and/or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market? Describe these incentives as quantitatively as possible.
 
 ```{r}
 # Carbon_agg as calculated above, but with sector d included
