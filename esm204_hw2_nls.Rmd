@@ -594,7 +594,7 @@ carbon_agg_d <- data.frame(mc= mc_range,
 
 
 # named tax_d for convention but really gives the socailly optimal 
-# price of carbon under this scenario. THere is a decrease in the 
+# price of carbon under this scenario. There is a decrease in the 
 # price meaning higher reductions possibly?
 tax_d <- carbon_agg_d %>% filter(round(agg)==600) %>% 
   summarize(mc=mean(mc),
@@ -604,5 +604,13 @@ tax_d <- carbon_agg_d %>% filter(round(agg)==600) %>%
             sector_d=mean(sector_d),
             agg=mean(agg)
             )
+
+
+# Kazia goes rogue
+# here goes
+# kazia has thought about this but gotten nothing completed because # she must go to dinner
+# happy to chat through this after dinner if that's helpful Keene
+
+
 ```
 
