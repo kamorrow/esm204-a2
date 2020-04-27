@@ -603,7 +603,8 @@ tax_d <- carbon_agg_d %>% filter(round(agg)==600) %>%
             sector_c=mean(sector_c),
             sector_d=mean(sector_d),
             agg=mean(agg)
-            )
+            ) %>%
+  mutate(cap = "600")
 
 
 # Kazia goes rogue
@@ -611,12 +612,18 @@ tax_d <- carbon_agg_d %>% filter(round(agg)==600) %>%
 # kazia has thought about this but gotten nothing completed because # she must go to dinner
 # happy to chat through this after dinner if that's helpful Keene
 
-# Below here, Keene pulled in stuff from the last section and hoped that it was the right tactic.  I think this means that credits for 122 tons of emissions would be sold.
+# Below here, Keene pulled in stuff from the last section and hoped that it was the right tactic.  I think this means that credits for [some number that keeps changing as I find mistakes] tons of emissions would be sold.
 
 #Demand for credits
+a_cnt_demand2 <- carbon_a_fun_inv(tax_d$mc)
+b_cnt_demand2 <- carbon_b_fun_inv(tax_d$mc)
+c_cnt_demand2 <- carbon_c_fun_inv(tax_d$mc)
 d_cnt_demand <- carbon_d_fun_inv(tax_d$mc)
 
 #Surplus or deficit of credits
+a_cnt_sold2 <- credit - a_cnt_demand2
+b_cnt_sold2 <- credit - b_cnt_demand2
+c_cnt_sold2 <- credit - c_cnt_demand2
 d_cnt_sold <- 300 - d_cnt_demand
 
 # (1) Total Cost
@@ -627,7 +634,33 @@ d_cnt_sold <- 300 - d_cnt_demand
 
 # (2) Sector cost
 # This is similar to the tax question. Add the extra area to calculation such that the sold/purchased credits are accounted for
-sector_d_cost_cnt <-  integrate(carbon_d_fun_demand,carbon_d_fun_inv(tax_d$mc),current_d)$value-
+sector_a_cost_cnt2 <-  integrate(carbon_a_fun_demand,carbon_a_fun_inv(tax_d$mc),current_a)$value -
+  integrate(carbon_a_fun_demand,carbon_a_fun_inv(tax_d$mc),100)$value
+
+sector_b_cost_cnt2 <-  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax_d$mc),current_b)$value +
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax_d$mc),100)$value
+
+sector_c_cost_cnt2 <-  integrate(carbon_c_fun_demand,carbon_c_fun_inv(tax_d$mc),current_c)$value +
+  integrate(carbon_a_fun_demand,carbon_a_fun_inv(tax_d$mc),100)$value +
+  integrate(carbon_b_fun_demand,carbon_b_fun_inv(tax_d$mc),100)$value
+
+sector_d_cost_cnt <-  integrate(carbon_d_fun_demand,carbon_d_fun_inv(tax_d$mc),current_d)$value -
   integrate(carbon_d_fun_demand,carbon_d_fun_inv(tax_d$mc),300)$value
+
+
+all_tax <- tax %>%
+  mutate(cap = "300") %>%
+  full_join(tax_d)
+
+
+
 ```
+
+
+
+
+
+
+
+
 
